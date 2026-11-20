@@ -1,0 +1,7 @@
+{
+  "appId": "com.joe.demiplank",
+  "appName": "Demi Plank",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#1B2A47" }
+}
