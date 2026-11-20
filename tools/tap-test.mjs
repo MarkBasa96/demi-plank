@@ -96,6 +96,12 @@ await connect();
 for (const m of ['Page.enable', 'Runtime.enable', 'Network.enable']) await cdp(m);
 await cdp('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
 await cdp('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+// a fake speech engine that behaves like iPhone: speaking a new line while one is playing QUEUES it (that was the late-words bug)
+const FAKE_SPEECH = `(() => { const log=[]; let speaking=false, t=0; const vs=['Albert','Bubbles','Samantha','Daniel','Zarvox'].map((n,i)=>({name:n,voiceURI:'v'+i,lang:'en-US',localService:true}));
+  window.SpeechSynthesisUtterance = function(text){ this.text=text; };
+  const synth={ get speaking(){return speaking}, get pending(){return false}, getVoices:()=>vs, addEventListener(){}, resume(){}, cancel(){ log.push({c:1}); speaking=false; clearTimeout(t); }, speak(u){ if(speaking) window.__speech.violations++; log.push({s:u.text, v:u.voice&&u.voice.name}); speaking=true; clearTimeout(t); t=setTimeout(()=>{speaking=false}, 2500); } };
+  window.__speech={log, violations:0}; Object.defineProperty(window,'speechSynthesis',{value:synth,configurable:true}); })()`;
+await cdp('Page.addScriptToEvaluateOnNewDocument', { source: FAKE_SPEECH });
 await cdp('Page.navigate', { url: URL0 }); await sleep(900);
 
 try {
@@ -242,6 +248,12 @@ try {
   check('Done: history entry saved', h0.kind === 'workout' && h0.name === 'MY TRAINING' && h0.secs >= 4 && h0.secs <= 14 && h0.kcal > 0, JSON.stringify(h0));
   console.log('INFO done stats', dn.join(' | '), 'moves credited', h0.moves);
   check('Done (no level) -> Reports tab', (await q('.tab.on')) === 'Reports');
+  const sp = JSON.parse(await ev(`JSON.stringify(window.__speech)`)); const spoken = sp.log.filter(x => x.s && x.s.trim());
+  check('Voice: the coach spoke during the workout', spoken.length >= 6, 'lines ' + spoken.length);
+  check('Voice: never queued behind another line (late-words bug)', sp.violations === 0, 'overlaps ' + sp.violations);
+  check('Voice: same ranked voice every time, never a novelty voice', spoken.every(x => x.v === 'Samantha'), [...new Set(spoken.map(x => x.v))].join(','));
+  check('Voice: workout opens with Get ready + move name', spoken.some(x => /^Get ready\. \w/.test(x.s)), spoken.map(x => x.s).join(' | ').slice(0, 160));
+  check('Voice: countdown 3-2-1 is spoken', ['3', '2', '1'].every(d => spoken.some(x => x.s === d)), spoken.map(x => x.s).join(' | ').slice(0, 200));
 
   // plan day, all skipped
   await act('tab', { text: 'Plan' }); await act('selday', { data: { d: 1 } }); await act('planstart');
