@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP = new Set(['sw.js', 'package.json', 'package-lock.json', 'vercel.json', '.gitignore', 'README.md']);
-const SKIPDIR = new Set(['tools', 'node_modules', '.git', 'test']);
+const SKIPDIR = new Set(['tools', 'node_modules', '.git', 'test', 'docs', 'android-app']);
 const files = [];
 (function walk(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
