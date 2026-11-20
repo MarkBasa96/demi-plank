@@ -401,6 +401,29 @@ try {
   check('Live: nothing ever queued behind another line', sp3.violations === 0, 'overlaps ' + sp3.violations);
   await act('wquit'); await act('giveupquit');
 
+  // ---------------- 9c. Android app: native text-to-speech (stubbed plugin) ----------------
+  const nat = JSON.parse(await ev(`(async () => {
+    const calls = []; let pendingResolve = [];
+    window.Capacitor = { isNativePlatform: () => true, Plugins: { TextToSpeech: {
+      speak: o => { calls.push({ speak: o }); return new Promise(res => pendingResolve.push(res)); },
+      stop: () => { calls.push({ stop: 1 }); return Promise.resolve(); },
+      getSupportedVoices: () => Promise.resolve({ voices: [{ name: 'fr-fr-x-abc-local', lang: 'fr-FR', voiceURI: 'v0', localService: true }, { name: 'en-us-x-sfg#male_1-local', lang: 'en-US', voiceURI: 'v1', localService: true }, { name: 'en-gb-x-gbb-network', lang: 'en-GB', voiceURI: 'v2', localService: false }] }) } } };
+    const v = await import('/js/voice.js');
+    v.listVoices(); await new Promise(r => setTimeout(r, 120));
+    const voicesSeen = v.listVoices().map(x => x.name);
+    v.say('Hello coach', 'guide'); const afterFirst = calls.length; const busy1 = v.isBusy();
+    v.say('Here is a tip', 'tip'); const afterTip = calls.length;               // must NOT talk over the coach
+    v.say('Three', 'guide'); const afterGuide = calls.length;                   // must cut in
+    v.stopSpeaking(); const busy2 = v.isBusy();
+    pendingResolve.forEach(r => r()); await new Promise(r => setTimeout(r, 30));
+    v.say('After stop', 'tip'); const afterTip2 = calls.length;                 // free again, tip is allowed
+    const out = { voicesSeen, afterFirst, busy1, afterTip, afterGuide, busy2, afterTip2, first: calls[0] && calls[0].speak, guide: calls[1] && calls[1].speak, hasStop: calls.some(c => c.stop) };
+    delete window.Capacitor; return JSON.stringify(out); })()`));
+  check('Android voice: only English voices are listed', nat.voicesSeen.length === 2 && nat.voicesSeen.every(n => /^en-/.test(n)), nat.voicesSeen.join());
+  check('Android voice: a guide line goes to the native speaker (English, normal rate, cuts old speech)', nat.afterFirst === 1 && nat.first.text === 'Hello coach' && nat.first.lang === 'en-US' && nat.first.queueStrategy === 0 && nat.first.rate === 1, JSON.stringify(nat.first));
+  check('Android voice: a tip never talks over the coach, a countdown line cuts in', nat.busy1 === true && nat.afterTip === 1 && nat.afterGuide === 2 && nat.guide.text === 'Three', JSON.stringify([nat.afterTip, nat.afterGuide]));
+  check('Android voice: stop silences it, then tips are allowed again', nat.hasStop && nat.busy2 === false && nat.afterTip2 === 4);
+
   // ---------------- 10. offline ----------------
   await act('tab', { text: 'Library' });
   const picOk = await waitFor(`[...document.querySelectorAll('img.pic')].some(i => i.complete && i.naturalWidth > 0)`, 3000); check('Library pictures load (online)', picOk);

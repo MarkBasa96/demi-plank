@@ -1,10 +1,14 @@
-// Our own voice coach using the iPhone's built-in speech (works offline). No network, no downloads.
-// Rules that keep it steady on iPhone:
+// Our own voice coach. It speaks with the phone's own offline voices. No network, no downloads.
+// Two engines, same behaviour:
+//  - in a browser or on iPhone: the browser's speech synthesis
+//  - inside the Android app: Android's own text-to-speech (the app viewer has no browser speech), through a Capacitor plugin
+// Rules that keep it steady:
 //  - one voice at a time: a new line cuts the old one off (a queue made the countdown arrive late)
-//  - a coach tip never talks over anything
+//  - a coach tip or how-to line never talks over anything
 //  - same voice every time: picked from a fixed ranked list, novelty voices (Bubbles, Zarvox...) never chosen
-//  - speech is "unlocked" by your first tap, because iOS stays silent until a tap has happened
+//  - on iPhone, speech is "unlocked" by your first tap, because iOS stays silent until a tap has happened
 import { load } from './store.js';
+import { render } from './ui/ctx.js';
 
 const NOVELTY = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Junior|Ralph|Kathy|Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley)\b/i;
 const RANK = ['Samantha', 'Ava', 'Allison', 'Susan', 'Zoe', 'Nicky', 'Daniel', 'Karen', 'Moira', 'Tessa', 'Serena', 'Oliver', 'Kate', 'Stephanie'];
@@ -14,6 +18,30 @@ const score = v => {
 };
 const ss = () => (typeof window !== 'undefined' ? window.speechSynthesis : undefined);
 
+// ---------- Android app: native text-to-speech ----------
+const native = () => {
+  try { const c = window.Capacitor; if (!c || !c.isNativePlatform || !c.isNativePlatform()) return null; return (c.Plugins && c.Plugins.TextToSpeech) || (c.registerPlugin && c.registerPlugin('TextToSpeech')) || null; }
+  catch { return null; }
+};
+let nVoices = [], nLoading = false, nSpeaking = false, nToken = 0;
+function loadNativeVoices() {
+  const t = native(); if (!t || nLoading || nVoices.length) return; nLoading = true;
+  Promise.resolve(t.getSupportedVoices()).then(r => {
+    nVoices = ((r && r.voices) || []).map((v, i) => ({ ...v, index: i })).filter(v => /^en/i.test(v.lang) && !NOVELTY.test(v.name)).sort((a, b) => score(a) - score(b) || a.name.localeCompare(b.name));
+    nLoading = false; try { render(); } catch { /* ignore */ }
+  }).catch(() => { nLoading = false; });
+}
+function sayNative(t, text, kind) {
+  if ((kind === 'tip' || kind === 'explain') && nSpeaking) return; // never talk over the coach
+  const s = load().settings, v = nVoices.find(x => x.voiceURI === s.voiceURI);
+  const opts = { text, lang: 'en-US', rate: 1.0, pitch: 1.0, volume: 1.0, queueStrategy: 0 }; // 0 = a new line cuts the old one off
+  if (v) { opts.voice = v.index; opts.lang = v.lang; }
+  const mine = ++nToken; nSpeaking = true;
+  const done = () => { if (nToken === mine) nSpeaking = false; };
+  try { Promise.resolve(t.speak(opts)).then(done, done); } catch { done(); }
+}
+
+// ---------- browser / iPhone: speech synthesis ----------
 let voices = [];
 function refresh() {
   try { voices = (ss()?.getVoices() || []).filter(v => /^en/i.test(v.lang) && !NOVELTY.test(v.name)).sort((a, b) => score(a) - score(b) || a.name.localeCompare(b.name)); }
@@ -21,8 +49,11 @@ function refresh() {
 }
 try { refresh(); ss()?.addEventListener?.('voiceschanged', refresh); } catch { /* no speech support */ }
 
-export function listVoices() { refresh(); return voices.map(v => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService })); }
-export function supported() { return typeof window !== 'undefined' && 'speechSynthesis' in window; }
+export function listVoices() {
+  if (native()) { loadNativeVoices(); return nVoices.map(v => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService })); }
+  refresh(); return voices.map(v => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService }));
+}
+export function supported() { return !!native() || (typeof window !== 'undefined' && 'speechSynthesis' in window); }
 
 function pick() {
   const s = load().settings;
@@ -33,11 +64,12 @@ function pick() {
 // iOS keeps speech silent until a tap has started it once; a silent word on the first tap does that.
 let unlocked = false;
 function unlock() {
-  if (unlocked || !supported()) return; unlocked = true;
+  if (unlocked || native() || !supported()) return; unlocked = true;
   try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; ss().speak(u); } catch { /* ignore */ }
   for (const e of ['pointerdown', 'touchend', 'click']) document.removeEventListener(e, unlock, true);
 }
 try { for (const e of ['pointerdown', 'touchend', 'click']) document.addEventListener(e, unlock, { capture: true, passive: true }); } catch { /* ignore */ }
+try { loadNativeVoices(); } catch { /* not in the Android app */ }
 
 const live = new Set(); // keep references so the browser cannot drop an utterance mid-sentence
 let timer = 0;
@@ -47,6 +79,7 @@ export function say(text, kind = 'guide', force = false) {
   if (!supported() || !text) return;
   const s = load().settings;
   if (!force && (s.mute || (kind === 'guide' && !s.voice) || (kind === 'tip' && !s.tips) || (kind === 'explain' && !s.explain))) return;
+  const nat = native(); if (nat) { loadNativeVoices(); return sayNative(nat, text, kind); }
   try {
     const synth = ss(), busy = synth.speaking || synth.pending;
     if ((kind === 'tip' || kind === 'explain') && busy) return; // explanations and tips never talk over the coach
@@ -60,8 +93,11 @@ export function say(text, kind = 'guide', force = false) {
     else go();
   } catch { /* ignore */ }
 }
-export function isBusy() { try { const s = ss(); return !!s && (s.speaking || s.pending); } catch { return false; } }
-export function stopSpeaking() { try { clearTimeout(timer); ss()?.cancel(); } catch { /* ignore */ } }
+export function isBusy() { const n = native(); if (n) return nSpeaking; try { const s = ss(); return !!s && (s.speaking || s.pending); } catch { return false; } }
+export function stopSpeaking() {
+  const n = native(); if (n) { nToken++; nSpeaking = false; try { Promise.resolve(n.stop()).catch(() => {}); } catch { /* ignore */ } return; }
+  try { clearTimeout(timer); ss()?.cancel(); } catch { /* ignore */ }
+}
 
 // Our own coach tips (short, plain, no hype). Picked at random during holds.
 export const TIPS = [
