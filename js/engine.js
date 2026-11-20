@@ -79,7 +79,7 @@ export function getLevel(index) {
   return { ...generated('master' + cycle, MASTER, cycle, 'Master cycle ' + cycle, 'master-' + cycle), index };
 }
 export function levelBlurb(index) {
-  return ['Avg 7 mins & begin with 3 mins', 'Avg 11 mins & begin with 5 mins', 'Avg 16 mins & begin with 9 mins', 'Harder moves, longer levers', 'The hardest holds. Then it keeps going.'][index] || 'Each cycle a little tougher, never past 40 minutes';
+  return ['Avg 7 mins & begin with 3 mins', 'Avg 11 mins & begin with 5 mins', 'Avg 16 mins & begin with 9 mins', 'Harder moves, longer levers', 'The hardest holds. Then it keeps going.'][index] || 'Tougher each cycle, 40 min cap';
 }
 
 /** Full session for a day: warm, main, cool, each as {id, secs, section}. */

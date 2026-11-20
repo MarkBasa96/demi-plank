@@ -48,6 +48,7 @@ function bindSliders() {
 
 // phone locked or app switched: pause the workout so the clock never runs while nobody is planking
 document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { ui.player?.wake?.(); ui.challenge?.wake?.(); }
   if (document.hidden) { flush(); if (ui.player && !ui.player.paused) { ui.player.togglePause(); } }
 });
 window.addEventListener('pagehide', flush);
@@ -58,4 +59,3 @@ load();
 // start on the plan tab if the user has progress, else the Challenge tab like the original
 ui.tab = 'challenge';
 render();
-window.__demi = { ui, acts, render }; // handy for the tap-through test; harmless in the shipped app

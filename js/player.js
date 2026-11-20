@@ -59,13 +59,13 @@ export class Player {
       this.credit();
       const n = this.next;
       if (!n) return this.finish();
-      if (this.item.section === 'main' && n.section === 'main') { this.idx++; this.idx--; return this.toRest(); }
+      if (this.item.section === 'main' && n.section === 'main') return this.toRest();
       this.idx++; return this.enterPhase('move');
     }
     if (this.phase === 'rest') { this.idx++; return this.enterPhase('move'); }
   }
   toRest() { this.enterPhase('rest', this.restSecs); }
-  credit() { const s = this.countUp ? this.acc : this.item.secs; this.kcal += kcalPerMin(this.item.id) * s / 60; this.movesDone++; }
+  credit() { const s = this.countUp ? this.acc : this.item.secs; if (this.countUp) this.hold = Math.round(this.acc); this.kcal += kcalPerMin(this.item.id) * s / 60; this.movesDone++; }
   // controls
   togglePause() { this.paused = !this.paused; this.last = performance.now(); if (this.paused) stopSpeaking(); this.opts.onChange?.(); }
   skip() {
@@ -80,11 +80,16 @@ export class Player {
   }
   prev() { stopSpeaking(); if (this.idx > 0) { this.idx--; this.cues = new Set(); this.enterPhase('move'); } else this.enterPhase('move'); }
   addRest() { if (this.phase === 'rest') { this.phaseLen += 20; this.opts.onTick?.(); } }
-  completeNow() { if (this.countUp) { this.credit(); this.finish(); } } // test-day max plank
+  completeNow() { // test-day max plank: log the hold, then carry on with the rest of the day like any other move
+    if (!this.countUp) return; stopSpeaking(); this.credit();
+    const n = this.next; if (!n) return this.finish();
+    if (this.item.section === 'main' && n.section === 'main') return this.toRest();
+    this.idx++; this.enterPhase('move');
+  }
   finish() {
     if (this.finished) return; this.finished = true; this.stop();
     say('Well done. Workout complete.');
-    this.opts.onDone?.({ secs: Math.round(this.spent), kcal: Math.round(this.kcal * 10) / 10, moves: this.movesDone });
+    this.opts.onDone?.({ secs: Math.round(this.spent), hold: this.hold || 0, kcal: Math.round(this.kcal * 10) / 10, moves: this.movesDone });
   }
   stop() { clearInterval(this.timer); try { this.lock?.release(); } catch { /* ignore */ } stopSpeaking(); }
 }

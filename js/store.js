@@ -16,9 +16,36 @@ const DEFAULTS = () => ({
 let state = null;
 export function load() {
   if (state) return state;
-  try { const raw = localStorage.getItem(KEY); state = raw ? merge(DEFAULTS(), JSON.parse(raw)) : DEFAULTS(); }
-  catch { state = DEFAULTS(); }
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); state = raw ? sanitize(merge(DEFAULTS(), JSON.parse(raw))) : DEFAULTS(); }
+  catch { state = DEFAULTS(); if (raw) { try { localStorage.setItem(KEY + ':corrupt', raw); } catch { /* nothing more to do */ } } }
   return state;
+}
+// A tampered or damaged save must never crash a screen or become markup: force every field to the right shape.
+const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+const num = (v, d, lo = -Infinity, hi = Infinity) => (typeof v === 'number' && isFinite(v) && v >= lo && v <= hi ? v : d);
+const pair = x => Array.isArray(x) && typeof x[0] === 'string' && /^[a-z0-9-]+$/.test(x[0]) && typeof x[1] === 'number' && isFinite(x[1]) && x[1] >= 0 && x[1] <= 3600;
+function sanitize(o) {
+  const d = DEFAULTS(), s = o.settings;
+  for (const k of ['mute', 'voice', 'tips', 'warm', 'weighted']) s[k] = typeof s[k] === 'boolean' ? s[k] : d.settings[k];
+  s.voiceURI = typeof s.voiceURI === 'string' ? s.voiceURI.slice(0, 300) : '';
+  s.restMode = s.restMode === 'custom' ? 'custom' : 'default';
+  s.restSecs = num(s.restSecs, 20, 5, 120);
+  s.wUnit = s.wUnit === 'kg' ? 'kg' : 'lb'; s.hUnit = s.hUnit === 'cm' ? 'cm' : 'in';
+  o.levelIndex = Number.isInteger(o.levelIndex) && o.levelIndex >= 0 && o.levelIndex <= 500 ? o.levelIndex : 0;
+  if (!isObj(o.progress)) o.progress = {};
+  for (const k of Object.keys(o.progress)) { const p = o.progress[k]; if (!isObj(p) || !isObj(p.done)) delete o.progress[k]; else p.current = Number.isInteger(p.current) && p.current >= 1 && p.current <= 100 ? p.current : 1; }
+  o.history = (Array.isArray(o.history) ? o.history : []).filter(h => isObj(h) && typeof h.name === 'string' && Number.isFinite(h.ts) && Number.isFinite(h.secs)).slice(0, 5000)
+    .map(h => ({ ...h, name: h.name.slice(0, 80), kcal: num(h.kcal, 0), moves: num(h.moves, 0), secs: num(h.secs, 0) }));
+  o.best = isObj(o.best) && Number.isFinite(o.best.secs) && Number.isFinite(o.best.ts) ? { secs: o.best.secs, ts: o.best.ts } : null;
+  o.weights = (Array.isArray(o.weights) ? o.weights : []).filter(w => isObj(w) && typeof w.date === 'string' && /^\d{4}-\d\d-\d\d$/.test(w.date) && num(w.kg, 0, 20, 700) > 0);
+  o.heightCm = num(o.heightCm, null, 80, 260);
+  if (!isObj(o.edits)) o.edits = {};
+  for (const k of Object.keys(o.edits)) if (!/^\d+-\d+$/.test(k) || !Array.isArray(o.edits[k]) || !o.edits[k].every(pair)) delete o.edits[k];
+  o.custom = (Array.isArray(o.custom) ? o.custom : []).filter(pair);
+  if (!isObj(o.ratings)) o.ratings = {};
+  for (const k of Object.keys(o.ratings)) if (o.ratings[k] !== 1 && o.ratings[k] !== -1) delete o.ratings[k];
+  return o;
 }
 function merge(base, saved) {
   const o = { ...base, ...saved };

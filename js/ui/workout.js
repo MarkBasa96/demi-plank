@@ -22,7 +22,7 @@ function finishWorkout(r) {
     levelDone = m.day >= dayCount(m.level); // the last day of every level is a training day
   }
   addHistory(rec);
-  if (m.test) { const s = load(), t = Math.round(r.secs); /* test-day plank counts as a challenge record too */ if (!s.best || t > s.best.secs) { s.best = { secs: t, ts: Date.now() }; save(); } }
+  if (m.test) { const s = load(), t = r.hold || 0; /* test-day plank counts as a challenge record too */ if (t > 0 && (!s.best || t > s.best.secs)) { s.best = { secs: t, ts: Date.now() }; save(); } }
   ui.player = null; ui.done = { ...r, name: m.name, level: m.level, day: m.day, levelDone, test: m.test };
   ui.stack = [{ v: 'done' }]; render();
 }
@@ -44,17 +44,17 @@ views.workout = () => {
   if (p.phase === 'rest') { const n = p.next; return `<div class="screen rest"><div class="wtop" style="padding-top:calc(var(--sat) + 10px)"><button class="icon-btn" data-act="wquit" aria-label="Back">${I.back}</button><button class="icon-btn rnd" data-act="mute" aria-label="Sound">${spk()}</button></div>
     <div class="tr">Take a rest</div><div class="ringw"><svg width="230" height="230" viewBox="0 0 230 230"><circle cx="115" cy="115" r="100" fill="none" stroke="#2A3A5C" stroke-width="12"/><circle id="pring" cx="115" cy="115" r="100" fill="none" stroke="#7283FF" stroke-width="12" stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="${628 * (1 - Math.max(0, 1 - p.acc / p.phaseLen))}"/></svg><div id="pn" class="c cond">${p.remaining}</div></div>
     <div class="restbtns"><button style="border:2px solid var(--ac)" data-act="wadd">+20s</button><button style="background:var(--ac)" data-act="wskip">SKIP</button></div>
-    <div class="card nextcard"><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--grey)">Next ${p.idx + 2}/${total}</div><div class="nn cond">${esc(moveName(n.id))}</div><div style="color:var(--grey);margin-top:6px;font-size:16px;font-weight:600">${n.secs ? mmss(n.secs) : 'Max hold'}</div></div><div class="thumb" style="width:140px;height:105px">${fig(n.id, 140)}</div></div></div>`; }
+    <div class="card nextcard"><div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--grey)">Next ${p.idx + 2}/${total}</div><div class="nn cond">${esc(moveName(n.id))}</div><div style="color:var(--grey);margin-top:6px;font-size:24px;font-weight:700">${n.secs ? mmss(n.secs) : 'Max hold'}</div></div><div class="thumb" style="width:140px;height:105px">${fig(n.id, 140)}</div></div></div>`; }
   // move
   const segs = p.items.map((_, i) => `<i class="${i < p.idx ? 'on' : i === p.idx ? 'cur' : ''}"></i>`).join('');
   const rated = load().ratings[it.id];
+  const rateHtml = `<div class="rate"><button class="${rated === -1 ? 'on' : ''}" data-act="wrate" data-v="-1" aria-label="Thumbs down"><span style="transform:scaleY(-1);display:block;line-height:0">${I.up}</span></button><button class="${rated === 1 ? 'on' : ''}" data-act="wrate" data-v="1" aria-label="Thumbs up">${I.up}</button></div>`;
   const cu = p.countUp;
   return `<div class="screen light"><div class="prog">${segs}</div><div class="wtop"><button class="icon-btn" data-act="wquit" aria-label="Back" style="color:var(--ink)">${I.back}</button>
     <div class="row" style="gap:10px"><button class="icon-btn rnd" data-act="mute" aria-label="Sound">${spk()}</button><button class="icon-btn rnd" data-act="whow" aria-label="How to">?</button></div></div>
     <div class="stage2">${fig(it.id, 380)}</div>
-    <div class="bignum"><span id="pn" class="s cond">${cu ? mmss(p.elapsed) : p.remaining + '"'}</span>${cu ? '' : `<span class="t cond">/${it.secs}"</span>`}</div>
+    <div class="bignum"><span id="pn" class="s cond">${cu ? mmss(p.elapsed) : p.remaining + '"'}</span>${cu ? '' : `<span class="t cond">/${it.secs}"</span>`}${cu ? '' : rateHtml}</div>
     <div class="mvname cond ${p.paused ? 'paused' : ''}">${p.paused ? 'PAUSED' : esc(moveName(it.id))}</div>
-    <div class="rate"><button class="${rated === -1 ? 'on' : ''}" data-act="wrate" data-v="-1" aria-label="Thumbs down"><span style="transform:scaleY(-1);display:block;line-height:0">${I.up}</span></button><button class="${rated === 1 ? 'on' : ''}" data-act="wrate" data-v="1" aria-label="Thumbs up">${I.up}</button></div>
     ${cu ? `<div class="slider" data-slider="test"><div class="lbl">Slide to complete</div><div class="knob">»</div></div>` : `<div class="cbar"><div id="pf" class="fill" style="width:${(p.fraction * 100).toFixed(1)}%"></div><button data-act="wprev" aria-label="Previous">${I.prev}</button><button class="main" data-act="wpause" aria-label="${p.paused ? 'Resume' : 'Pause'}">${p.paused ? I.play : I.pause}</button><button data-act="wskip" aria-label="Next">${I.next}</button></div>`}</div>`;
 };
 acts.wskip = () => ui.player?.skip();
@@ -78,9 +78,9 @@ views.done = () => {
   const title = r.levelDone ? 'LEVEL COMPLETE' : 'WORKOUT COMPLETE';
   return `<div class="screen done"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding-top:var(--sat)">
     <div class="row" style="gap:14px;align-items:flex-start">${I.medal.replace('width="88" height="100"', 'width="130" height="140"')}<div style="background:#fff;border-radius:50%;width:64px;height:64px;display:grid;place-items:center;margin-top:60px">${demi(52)}</div></div>
-    <div class="cond" style="font-size:40px;margin-top:20px;letter-spacing:.02em">${title}</div>
+    <div class="cond" style="font-size:34px;margin-top:20px;letter-spacing:.02em">${title}</div>
     <div style="color:var(--ok);font-weight:800;font-size:16px;letter-spacing:.1em;margin-top:6px">✓ ${esc(r.name.toUpperCase())}</div>
-    <div class="stats3"><div><div class="n cond">${hms(r.secs)}</div><div class="l">TIME</div></div><div><div class="n cond">${r.kcal}</div><div class="l">KCAL</div></div><div><div class="n cond">${r.moves}</div><div class="l">MOVES</div></div></div></div>
+    <div class="stats3"><div><div class="n cond">${r.secs >= 3600 ? hms(r.secs) : mmss(r.secs)}</div><div class="l">TIME</div></div><div><div class="n cond">${r.kcal}</div><div class="l">KCAL</div></div><div><div class="n cond">${r.moves}</div><div class="l">MOVES</div></div></div></div>
     <div style="width:100%;padding:0 24px calc(var(--sab) + 40px)">${r.levelDone ? `<button class="pill" data-act="nextlevel">NEXT LEVEL</button><button class="pill quiet" style="color:var(--s2)" data-act="donefin">Done</button>` : `<button class="pill" data-act="donefin">DONE</button>`}</div></div>`;
 };
 acts.donefin = () => { const r = ui.done; ui.done = null; ui.stack = []; ui.tab = r && r.level !== undefined ? 'plan' : 'reports'; if (r && r.level !== undefined) ui.sel[r.level] = Math.min(progressOf(r.level).current, dayCount(r.level)); render(); };

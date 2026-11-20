@@ -135,7 +135,7 @@ acts.planstart = () => { const li = lvIndex(), d = selDay(li), ses = sessionFor(
 views.levels = () => {
   const cur = lvIndex(), maxCycle = Math.max(cur, 4) + 1;
   const cards = [];
-  for (let i = 0; i <= maxCycle && i <= Math.max(5, cur + 1); i++) { const l = getLevel(i); cards.push(`<button class="lvl ${cur === i ? 'on' : ''}" data-act="pick" data-i="${i}"><h3>${esc(l.name)}</h3><p>${esc(levelBlurb(i))}</p><div style="position:absolute;right:-20px;bottom:-6px">${fig('plank', 120, ['plank', 'side', 'plank', 'side', 'plank', 'side'][i % 6])}</div></button>`); }
+  for (let i = 0; i <= maxCycle && i <= Math.max(5, cur + 1); i++) { const l = getLevel(i); cards.push(`<button class="lvl ${cur === i ? 'on' : ''}" data-act="pick" data-i="${i}"><h3>${esc(l.name)}</h3><p>${esc(levelBlurb(i))}</p><div style="position:absolute;right:-16px;bottom:-4px">${fig('plank', 104, ['plank', 'side', 'plank', 'side', 'plank', 'side'][i % 6])}</div></button>`); }
   cards.push(`<button class="lvl" data-act="custom"><h3>My training</h3><p>Create your own training plan!</p></button>`);
   return `<div class="screen">${topback('Plank plan')}<div class="content"><div class="grid2">${cards.join('')}</div></div></div>`;
 };
@@ -247,7 +247,7 @@ const FAQ = [
   ["I can't see the results", 'Keep going for four to six weeks. Pair planks with sleep and steady eating. Log your weight in Reports to see the trend.'],
   ['It’s too easy for me', 'Switch to a harder level in the Plan tab, or use Edit to lengthen the holds.'],
   ['It’s too hard for me', 'Drop one level, or use Edit to shorten a hold. A shorter hold with good form beats a long one that sags.'],
-  ['I finished all the levels. What now?', 'Master cycles never end. Each cycle is a little tougher, and sessions stay under 40 minutes, because past that more time adds risk, not strength.'],
+  ['I finished all the levels. What now?', 'Master cycles never end. Each cycle is a little tougher, and sessions stay under 40 minutes at the normal rest, because past that more time adds risk, not strength.'],
   ['Where is my data?', 'Only on this phone. There are no accounts and no ads. If you delete the app from your home screen, the data goes with it.'],
   ['Stop if it hurts', 'If you feel sharp pain, or you are injured or ill, stop and ask a doctor. Planks should feel like effort, not pain.'],
 ];
@@ -272,10 +272,10 @@ export function dialogHtml() {
   if (d.kind === 'height') return wrap(`<div class="dialog" data-stop><h3>Your height</h3><div class="row" style="margin:14px 0">${d.unit === 'cm' ? `<input class="field" id="hcm" inputmode="decimal" value="${esc(d.cm)}" placeholder="cm" aria-label="Height in centimetres">` : `<input class="field" id="hft" inputmode="numeric" value="${esc(d.ft)}" placeholder="ft" aria-label="Feet"><input class="field" id="hin" inputmode="decimal" value="${esc(d.inch)}" placeholder="in" aria-label="Inches">`}</div><div class="btns"><button data-act="dlgclose">CANCEL</button><button data-act="heightsave">SAVE</button></div></div>`);
   if (d.kind === 'sheet') return `<div class="dim bottom" data-act="dimclose"><div class="sheet" data-stop><div class="grab"></div><div class="stage">${fig(d.id, 300)}</div><h2 class="cond" style="font-size:30px;margin-top:14px;text-transform:uppercase">${esc(moveName(d.id))}</h2>
     <div class="row spread" style="margin-top:10px"><b>Duration</b>${d.editIdx !== undefined ? `<div class="stepper"><button data-act="secdn">−</button><b class="cond" style="font-size:24px">${mmss(d.secs)}</b><button data-act="secup">+</button></div>` : `<b class="cond" style="font-size:24px">${d.secs ? mmss(d.secs) : 'Max hold'}</b>`}</div>
-    <p style="margin-top:12px;font-size:15px;line-height:1.45;color:var(--grey)">${esc(moveDesc(d.id))}</p><div class="btns" style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px"><button style="padding:14px;font-weight:800;color:var(--grey)" data-act="dlgclose">${d.editIdx !== undefined ? 'CANCEL' : 'CLOSE'}</button>${d.editIdx !== undefined ? `<button class="pill" style="width:140px;height:56px" data-act="sheetsave">SAVE</button>` : ''}</div></div></div>`;
+    <p style="margin-top:12px;font-size:15px;line-height:1.45;color:var(--grey)">${esc(moveDesc(d.id))}</p><div class="btns" style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px"><button style="padding:14px 24px;font-weight:800;color:var(--grey);border:2px solid #D5D9E3;border-radius:999px" data-act="dlgclose">${d.editIdx !== undefined ? 'CANCEL' : 'CLOSE'}</button>${d.editIdx !== undefined ? `<button class="pill" style="width:140px;height:56px" data-act="sheetsave">SAVE</button>` : ''}</div></div></div>`;
   return '';
 }
-acts.dimclose = (el, ev) => { if (ev.target === el) closeDialog(); };
+acts.dimclose = (el, ev) => { if (ev.target === el) acts.dlgclose(); };
 acts.dlgclose = () => { const d = ui.dialog; closeDialog(); if (d && d.resume && ui.player && ui.player.paused) ui.player.togglePause(); };
 acts.restmode = el => { ui.dialog.mode = el.dataset.m; render(); };
 acts.restdn = () => { ui.dialog.secs = Math.max(5, ui.dialog.secs - 5); render(); };
