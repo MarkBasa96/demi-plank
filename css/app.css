@@ -196,3 +196,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .link:before,.toggle:before,.rcard>.row>button:not(.small-pill):before,.q:before{content:"";position:absolute;left:-8px;right:-8px;top:-12px;bottom:-12px}
 
 .days::-webkit-scrollbar{display:none}
+
+/* "?" sheet: fits any phone. Picture scales to the width, text sizes follow the screen, buttons stay reachable. */
+.sheet{max-height:92vh;max-height:92dvh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;max-width:640px;margin:0 auto}
+.sheet .stage{height:auto;aspect-ratio:4/3;max-height:clamp(120px,30dvh,260px);width:100%;margin:0 auto;overflow:hidden}
+.sheet .stage .figw{width:auto !important;height:100% !important;aspect-ratio:4/3;max-width:100%}
+.sheet .stage .figw .fig,.sheet .stage .figw .pic{width:100%;height:100%}
+.sheet h2{font-size:clamp(22px,7.4vw,30px) !important;line-height:1.05;overflow-wrap:anywhere}
+.howto h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--act);margin:16px 0 4px}
+.howto-plain{margin-top:12px;font-size:15px;line-height:1.45;color:var(--grey)}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;margin:12px 0;font-size:clamp(15px,4.3vw,18px);line-height:1.42;color:var(--ink)}
+.steps li:before{content:counter(s);flex:none;width:28px;height:28px;margin-top:-1px;border-radius:50%;background:var(--ac);color:#fff;font-weight:800;font-size:14px;display:grid;place-items:center}
+.steps li span{min-width:0;overflow-wrap:anywhere}
+.watch{background:var(--chip);border-left:4px solid var(--act);border-radius:12px;padding:12px 14px;margin:14px 0 4px;font-size:clamp(14px,4vw,16px);line-height:1.42;color:#4A5272;display:grid;gap:4px}
+.watch b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--act)}
+.sheetbtns{margin-top:12px;display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:calc(-1 * (var(--sab) + 18px));background:linear-gradient(rgba(255,255,255,0),#fff 28%);padding:14px 0 2px}
+@media (orientation:landscape) and (max-height:520px){.sheet{max-height:100vh;max-height:100dvh;border-radius:16px 16px 0 0}.sheet .stage{max-height:34dvh}}

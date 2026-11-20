@@ -167,6 +167,35 @@ try {
   st = await state(); check('Workout: quitting does not save anything', st.history.length === 2, 'history ' + st.history.length);
   check('Workout: quit lands on Library tab', (await q('.tab.on')) === 'Library');
 
+  // ---------------- 3b. How-to sheet ("?"): every move, every screen size ----------------
+  const allIds = await imp('data/moves.js', 'JSON.stringify(m.ALL_MOVE_IDS())').then(JSON.parse);
+  const noSteps = await imp('data/steps.js', 'JSON.stringify(' + JSON.stringify(allIds) + '.filter(i => { const r = m.moveSteps(i); return !(r && r.steps.length >= 3 && r.watch.length > 5 && !/[{}]|SIDE/.test(r.steps.join(" ") + r.watch)); }))').then(JSON.parse);
+  check('How-to: all ' + allIds.length + ' moves have 3+ steps and a watch-out, no leftover placeholders', noSteps.length === 0, noSteps.join(','));
+  const lr = await imp('data/steps.js', 'JSON.stringify([m.moveSteps("side-plank-left").steps[0], m.moveSteps("side-plank-right").steps[0], m.moveSteps("straight-leg-raise-right").steps.join(" ")])').then(JSON.parse);
+  check('How-to: left/right pairs say the right side', /left side/.test(lr[0]) && /right side/.test(lr[1]) && /right leg/.test(lr[2]) && /left knee/.test(lr[2]), lr.join(' | '));
+  const SIZES = [[320, 568, 'small-iphone'], [375, 667, 'iphone-se'], [390, 844, 'iphone'], [430, 932, 'iphone-max'], [844, 390, 'landscape'], [768, 1024, 'ipad']];
+  for (const [w, h, name] of SIZES) {
+    await cdp('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 2, mobile: true }); await sleep(350);
+    await act('tab', { text: 'Library' }); await act('libopen', { data: { id: 'morning-warmup' } }); await act('mvsheet', { nth: 1 });
+    const m = await ev(`(() => { const sh = document.querySelector('.sheet'); if (!sh) return null; const st = sh.querySelector('.stage').getBoundingClientRect(), r = sh.getBoundingClientRect();
+      return { over: Math.max(sh.scrollWidth - sh.clientWidth, document.documentElement.scrollWidth - innerWidth), li: sh.querySelectorAll('.steps li').length, watch: !!sh.querySelector('.watch'), stageW: st.width, sheetW: r.width, stageH: st.height, vh: innerHeight, sheetH: r.height,
+      minFont: Math.min(...[...sh.querySelectorAll('.steps li span')].map(e => parseFloat(getComputedStyle(e).fontSize))), h2: sh.querySelector('h2').getBoundingClientRect().right <= r.right + 1 }; })()`);
+    const tag = 'How-to ' + name + ' ' + w + 'x' + h;
+    check(tag + ': sheet opens with steps and watch-out', !!m && m.li >= 3 && m.watch, JSON.stringify(m));
+    check(tag + ': nothing spills sideways', m && m.over <= 1 && m.h2, 'over ' + m?.over);
+    check(tag + ': picture fits the width', m && m.stageW <= m.sheetW + 1 && m.stageH <= m.vh * 0.5, JSON.stringify({ sw: m?.stageW, sh: m?.sheetW, st: m?.stageH, vh: m?.vh }));
+    check(tag + ': sheet never taller than the screen', m && m.sheetH <= m.vh + 1, m?.sheetH + ' vs ' + m?.vh);
+    check(tag + ': step text is 15 px or bigger', m && m.minFont >= 15, 'min ' + m?.minFont);
+    await shot('howto-' + name + '-top');
+    await ev(`document.querySelector('.sheet').scrollTop = 99999`); await sleep(150);
+    const b = await ev(`(() => { const e = document.querySelector('.sheet [data-act="dlgclose"]').getBoundingClientRect(); return { t: e.top, b: e.bottom, vh: innerHeight, hit: (() => { const x = document.elementFromPoint(e.left + e.width / 2, e.top + e.height / 2); return !!x && !!x.closest('[data-act="dlgclose"]'); })() }; })()`);
+    check(tag + ': CLOSE is on screen and tappable after scrolling', b.t >= 0 && b.b <= b.vh + 1 && b.hit, JSON.stringify(b));
+    await shot('howto-' + name + '-bottom');
+    await act('dlgclose'); check(tag + ': closes', !(await exists('.sheet'))); await act('back');
+  }
+  await cdp('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true }); await sleep(300);
+
+
   // ---------------- 4. Mine settings ----------------
   await act('tab', { text: 'Mine' }); await noOverflow('Mine'); await shot('mine');
   await act('sounddlg'); await act('toggleopt', { data: { k: 'mute' } });
@@ -229,7 +258,7 @@ try {
   await sleep(7300); check('Ready ends by itself after 7 s -> move', (await exists('.screen.light')) && (await q('.bignum .s')) !== null, await q('.bignum'));
   await act('wrate', { data: { v: 1 } }); st = await state(); const rid = Object.keys(st.ratings)[0]; check('Thumbs up saved', st.ratings[rid] === 1, JSON.stringify(st.ratings));
   await act('wrate', { data: { v: 1 } }); st = await state(); check('Thumbs up toggles off', Object.keys(st.ratings).length === 0);
-  await act('whow'); check('? opens the how-to sheet and pauses', (await exists('.sheet')) && (await q('.mvname')) === 'PAUSED', await q('.mvname'));
+  await act('whow'); check('? opens the how-to sheet (with steps) and pauses', (await exists('.sheet .steps li')) && (await q('.mvname')) === 'PAUSED', await q('.mvname'));
   await ev(`document.querySelector('.dim.bottom').dispatchEvent(new MouseEvent('click',{bubbles:true}))`); await sleep(150); check('Tapping outside the sheet also resumes the workout', (await q('.mvname')) !== 'PAUSED' && !(await exists('.sheet')), await q('.mvname'));
   await act('whow'); await act('dlgclose'); check('Closing the sheet resumes the workout', (await q('.mvname')) !== 'PAUSED', await q('.mvname'));
   await sleep(5100); check('Move ends by itself -> rest screen', (await q('.tr')) === 'Take a rest', await q('.tr')); await shot('workout-rest');

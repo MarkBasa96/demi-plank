@@ -3,6 +3,7 @@ import { esc, I, fig, demi, q, mmss, hms } from './common.js';
 import { load, save, flush, progressOf, dayKey, kgToLb, lbToKg, resetProgress, wipeAll, addHistory, markDone } from '../store.js';
 import { getLevel, getSession, dayMinutes, dayCount, levelBlurb, REST_DAYS } from '../engine.js';
 import { moveName, moveDesc, movePose, kcalPerMin } from '../data/moves.js';
+import { moveSteps } from '../data/steps.js';
 import { LIBRARY } from '../data/library.js';
 import { listVoices, say } from '../voice.js';
 import { Challenge } from '../player.js';
@@ -257,6 +258,12 @@ acts.faqopen = el => { const i = Number(el.dataset.i); ui.faqOpen = ui.faqOpen =
 
 // ---------- dialogs ----------
 const opt = (act, label, on, data = '') => `<button class="opt" data-act="${act}" ${data}>${label}<span class="radio ${on ? 'on' : ''}"></span></button>`;
+// the step-by-step part of the "?" sheet; falls back to the short line if a move has no steps
+function howTo(id) {
+  const h = moveSteps(id);
+  if (!h) return `<p class="howto-plain">${esc(moveDesc(id))}</p>`;
+  return `<div class="howto"><h3>How to do it</h3><ol class="steps">${h.steps.map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ol><div class="watch"><b>Watch out</b><span>${esc(h.watch)}</span></div></div>`;
+}
 export function dialogHtml() {
   const d = ui.dialog; if (!d) return '';
   const s = S();
@@ -272,7 +279,7 @@ export function dialogHtml() {
   if (d.kind === 'height') return wrap(`<div class="dialog" data-stop><h3>Your height</h3><div class="row" style="margin:14px 0">${d.unit === 'cm' ? `<input class="field" id="hcm" inputmode="decimal" value="${esc(d.cm)}" placeholder="cm" aria-label="Height in centimetres">` : `<input class="field" id="hft" inputmode="numeric" value="${esc(d.ft)}" placeholder="ft" aria-label="Feet"><input class="field" id="hin" inputmode="decimal" value="${esc(d.inch)}" placeholder="in" aria-label="Inches">`}</div><div class="btns"><button data-act="dlgclose">CANCEL</button><button data-act="heightsave">SAVE</button></div></div>`);
   if (d.kind === 'sheet') return `<div class="dim bottom" data-act="dimclose"><div class="sheet" data-stop><div class="grab"></div><div class="stage">${fig(d.id, 300)}</div><h2 class="cond" style="font-size:30px;margin-top:14px;text-transform:uppercase">${esc(moveName(d.id))}</h2>
     <div class="row spread" style="margin-top:10px"><b>Duration</b>${d.editIdx !== undefined ? `<div class="stepper"><button data-act="secdn">−</button><b class="cond" style="font-size:24px">${mmss(d.secs)}</b><button data-act="secup">+</button></div>` : `<b class="cond" style="font-size:24px">${d.secs ? mmss(d.secs) : 'Max hold'}</b>`}</div>
-    <p style="margin-top:12px;font-size:15px;line-height:1.45;color:var(--grey)">${esc(moveDesc(d.id))}</p><div class="btns" style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px"><button style="padding:14px 24px;font-weight:800;color:var(--grey);border:2px solid #D5D9E3;border-radius:999px" data-act="dlgclose">${d.editIdx !== undefined ? 'CANCEL' : 'CLOSE'}</button>${d.editIdx !== undefined ? `<button class="pill" style="width:140px;height:56px" data-act="sheetsave">SAVE</button>` : ''}</div></div></div>`;
+    ${howTo(d.id)}<div class="btns sheetbtns"><button style="padding:14px 24px;font-weight:800;color:var(--grey);border:2px solid #D5D9E3;border-radius:999px" data-act="dlgclose">${d.editIdx !== undefined ? 'CANCEL' : 'CLOSE'}</button>${d.editIdx !== undefined ? `<button class="pill" style="width:140px;height:56px" data-act="sheetsave">SAVE</button>` : ''}</div></div></div>`;
   return '';
 }
 acts.dimclose = (el, ev) => { if (ev.target === el) acts.dlgclose(); };
