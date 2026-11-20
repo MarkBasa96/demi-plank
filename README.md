@@ -10,7 +10,7 @@
 [![Offline](https://img.shields.io/badge/works-offline-7283FF)](#how-it-works-offline)
 [![No ads](https://img.shields.io/badge/ads-none-2FBF71)](#privacy)
 [![No accounts](https://img.shields.io/badge/accounts-none-2FBF71)](#privacy)
-[![Tests](https://img.shields.io/badge/tests-211%20passing-2FBF71)](#testing)
+[![Tests](https://img.shields.io/badge/tests-215%20passing-2FBF71)](#testing)
 [![Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-5565F0)](#tech)
 
 ![Demi Plank on a phone: the Plan, a workout, a rest, and the Reports screen](docs/screenshots/hero.png)
@@ -144,7 +144,9 @@ supported, and test days use a count-up hold with a slide-to-finish control.
 - [`js/coach.js`](js/coach.js) writes the script: the line for the Ready or Rest phase, and a timed plan for the hold.
 - [`js/data/steps.js`](js/data/steps.js) holds the steps and "watch out" for every move. Left/right pairs share one entry.
 - [`js/data/about.js`](js/data/about.js) holds the one-line "what this does for you" for every move.
-- [`js/voice.js`](js/voice.js) speaks it with the phone's own offline voices (the browser's speech synthesis).
+- [`js/voice.js`](js/voice.js) speaks it with the phone's own offline voices: the browser's speech synthesis on iPhone and in a browser,
+  and **Android's own text-to-speech** inside the Android app (the Android app viewer has no browser speech, so the
+  `@capacitor-community/text-to-speech` plugin provides it).
   One line at a time, the same ranked voice every time (never a novelty voice), and an "unlock" on your first tap, because iPhones stay silent until a tap has happened.
 
 ### How it works offline
@@ -229,12 +231,14 @@ Two layers, both run locally:
 
 - **Plan engine** (`tools/test-engine.mjs`): 3,362 sessions across 140 levels. Checks the 40-minute cap, hold caps, rest days,
   test days and growth between cycles.
-- **Tap-through test** (`tools/tap-test.mjs`): **211 checks** that drive the real app in headless Microsoft Edge at iPhone size with **real touch taps**.
+- **Tap-through test** (`tools/tap-test.mjs`): **215 checks** that drive the real app in headless Microsoft Edge at iPhone size with **real touch taps**.
   Each check reads a saved value or visible text, not just "no error". It covers:
   - all five tabs, the Challenge (start, quit, record), Library, Plan (select, edit, replace, duration, reset, level chooser, My training);
   - full workouts: ready, move, rest, pause, previous, next, +20 s, done, level complete, and a test day at Master cycle 2;
   - Reports (weight, height, BMI, history) and Mine (sound, rest, units, restart, delete);
   - the how-to sheet for all 132 moves, at six screen sizes from 320 px wide to a tablet and landscape;
+  - the Android voice path, using a stand-in for the native speech plugin (English voices only, tips never talk over the coach,
+    a countdown cuts in, stop silences);
   - the voice coach, using a fake speech engine that queues like an iPhone does: no overlapping lines, the same voice every time,
     steps spoken in order, nothing scheduled over the countdown;
   - a corrupt, partial, tampered or blocked save;
@@ -274,7 +278,7 @@ repository secrets, `ANDROID_KEYSTORE_B64` and `ANDROID_KEYSTORE_PASSWORD`, and 
 
 **How it is built:** [`android-app/scripts/prepare.mjs`](android-app/scripts/prepare.mjs) copies the web app into `android-app/www`;
 `cap add android` creates the project; [`patch-android.mjs`](android-app/scripts/patch-android.mjs) sets the launcher icon, splash screen,
-keep-screen-on and a version number from the build number; Gradle builds a release APK, which is aligned and signed with `apksigner`.
+keep-screen-on and a version number from the build number (the text-to-speech plugin is installed by `cap sync`); Gradle builds a release APK, which is aligned and signed with `apksigner`.
 
 ---
 
