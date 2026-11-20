@@ -26,6 +26,8 @@ function whiteToAlpha(buf, w, h) { // flood fill from the border through near-wh
     buf[i * 4 + 3] = 0;
     if (x > 0) push(x - 1, y); if (x < w - 1) push(x + 1, y); if (y > 0) push(x, y - 1); if (y < h - 1) push(x, y + 1);
   }
+  // white pockets enclosed by the figure (under the torso, between limbs) are background too
+  for (let i = 0; i < w * h; i++) if (near(i)) buf[i * 4 + 3] = 0;
   // soften the 1px fringe next to removed background so no white halo shows on tinted tiles
   for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
     const i = y * w + x; if (buf[i * 4 + 3] === 0) continue;
@@ -34,15 +36,31 @@ function whiteToAlpha(buf, w, h) { // flood fill from the border through near-wh
     }
   }
 }
+// Label connected pieces on the whole sheet, then give each cell the pieces whose centre lies in it.
+// (Cutting at fixed cell borders clips figures that reach across a border and picks up bits of neighbours.)
+const full = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+const FW = full.info.width, FH = full.info.height, buf = full.data;
+whiteToAlpha(buf, FW, FH);
+const lab = new Int32Array(FW * FH), comps = [];
+for (let i0 = 0; i0 < FW * FH; i0++) {
+  if (lab[i0] || buf[i0 * 4 + 3] === 0) continue;
+  const id = comps.length + 1, st = [i0]; lab[i0] = id; let area = 0, sx = 0, sy = 0;
+  while (st.length) { const i = st.pop(); area++; const x = i % FW, y = (i - x) / FW; sx += x; sy += y;
+    for (const j of [x > 0 ? i - 1 : -1, x < FW - 1 ? i + 1 : -1, y > 0 ? i - FW : -1, y < FH - 1 ? i + FW : -1]) if (j >= 0 && !lab[j] && buf[j * 4 + 3] !== 0) { lab[j] = id; st.push(j); } }
+  comps.push({ id, area, cx: sx / area, cy: sy / area });
+}
 let n = 0;
 for (let k = 0; k < ids.length; k++) {
   if (ids[k] === '-') continue;
-  const [id, mirror] = ids[k].split('>'), cx = k % cols, cy = Math.floor(k / cols);
-  const { data, info } = await sharp(file).extract({ left: cx * cw, top: cy * ch, width: cw, height: ch }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  whiteToAlpha(data, info.width, info.height);
-  const trimmed = await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 1 }).png().toBuffer();
+  const [id, mirror] = ids[k].split('>'), c0 = k % cols, r0 = Math.floor(k / cols);
+  const mine = comps.filter(c => Math.floor(c.cx / cw) === c0 && Math.floor(c.cy / ch) === r0);
+  if (!mine.length) { console.warn('no figure found for', id); continue; }
+  const big = Math.max(...mine.map(c => c.area)), keep = new Set(mine.filter(c => c.area >= big * 0.03).map(c => c.id));
+  const out = Buffer.alloc(FW * FH * 4);
+  for (let i = 0; i < FW * FH; i++) if (keep.has(lab[i])) { out[i * 4] = buf[i * 4]; out[i * 4 + 1] = buf[i * 4 + 1]; out[i * 4 + 2] = buf[i * 4 + 2]; out[i * 4 + 3] = buf[i * 4 + 3]; }
+  const trimmed = await sharp(out, { raw: { width: FW, height: FH, channels: 4 } }).trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 1 }).png().toBuffer();
   const fitted = await sharp(trimmed).resize({ width: FIT_W, height: FIT_H, fit: 'inside' }).toBuffer();
-  const make = async (img, name) => { await sharp({ create: { width: W, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: img, gravity: 'centre' }]).webp({ quality: 88, alphaQuality: 100 }).toFile(path.join(OUT, name + '.webp')); n++; console.log('wrote', name); };
+  const make = async (img, name) => { await sharp({ create: { width: W, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: img, gravity: 'centre' }]).webp({ quality: 88, alphaQuality: 100 }).toFile(path.join(OUT, name + '.webp')); n++; };
   await make(fitted, id);
   if (mirror) await make(await sharp(fitted).flop().toBuffer(), mirror);
 }

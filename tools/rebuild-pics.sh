@@ -1,0 +1,33 @@
+#!/bin/bash
+# Rebuilds every picture from the saved sheets (in the vault: 03-outputs/pictures/sheets). Run from the repo root.
+B="PATH-TO-VAULT/03-projects/plank-workout/03-outputs/pictures"
+M="node tools/make-pics.mjs"
+rm -f pics/*.webp
+$M "$B/reference/option-B.png" 1x1 plank
+$M "$B/sheets/sheet-01-planks.png" 2x2 straight-arm-plank,knee-plank,side-plank-left\>side-plank-right,-
+$M "$B/sheets/sheet-02.png" 2x4 bird-dog,kneeling-side-plank-left\>kneeling-side-plank-right,-,-,star-side-plank-left\>star-side-plank-right,-,-,leg-raised-plank-left\>leg-raised-plank-right
+$M "$B/sheets/sheet-03.png" 2x2 -,wide-arm-plank,push-up-hold,straight-arm-knee-plank
+$M "$B/sheets/sheet-05.png" 2x2 plank-with-left-arm-lift\>plank-with-right-arm-lift,diagonal-plank-hold-left\>diagonal-plank-hold-right,long-lever-plank,plank-shoulder-taps
+$M "$B/sheets/sheet-06.png" 2x2 -,modified-push-up-low-hold,-,leg-up-side-plank-left\>leg-up-side-plank-right
+$M "$B/sheets/sheet-07.png" 2x2 copenhagen-side-plank-left\>copenhagen-side-plank-right,kneeling-copenhagen-side-plank-left\>kneeling-copenhagen-side-plank-right,body-saw,hollow-body-hold
+$M "$B/sheets/sheet-08-warmup.png" 2x2 head-tilt,bent-arm-circles,dynamic-chest,knee-to-elbow-crunches
+$M "$B/sheets/sheet-09-cooldown.png" 2x2 cobra-stretch,cat-cow-pose,shoulder-stretch,triceps-stretch-left\>triceps-stretch-right
+$M "$B/sheets/sheet-10-stretch.png" 2x2 wrists-and-ankles-stretch-left\>wrists-and-ankles-stretch-right,clasp-hands-behind-back,standing-biceps-stretch-left\>standing-biceps-stretch-right,child-s-pose
+$M "$B/sheets/sheet-11-hiit.png" 2x2 jumping-jacks,butt-kicks,high-stepping,bridge
+$M "$B/sheets/sheet-12-moving.png" 2x2 -,spiderman-plank,mountain-climber,downward-facing-dog
+$M "$B/sheets/sheet-13-crunch.png" 2x2 abdominal-crunches,bicycle-crunches,sit-ups,leg-raises
+$M "$B/sheets/sheet-14-core.png" 2x2 flutter-kicks,reclined-oblique-twist,v-hold,reverse-crunches
+cd pics
+# same-pose aliases (honest approximations; replace with dedicated art when it exists)
+cp diagonal-plank-hold-left.webp single-arm-single-leg-plank-left.webp; cp diagonal-plank-hold-right.webp single-arm-single-leg-plank-right.webp
+cp plank-with-left-arm-lift.webp plank-and-reach-left.webp; cp plank-with-right-arm-lift.webp plank-and-reach-right.webp
+cp leg-raised-plank-left.webp single-left-leg-plank.webp; cp leg-raised-plank-right.webp single-right-leg-plank.webp
+cp long-lever-plank.webp long-lever-single-leg-plank-left.webp; cp long-lever-plank.webp long-lever-single-leg-plank-right.webp
+cp plank.webp max-plank-test.webp; cp plank.webp rkc-plank.webp; cp plank.webp weighted-plank.webp
+cp side-plank-left.webp left-side-plank-with-arm-raised.webp; cp side-plank-right.webp right-side-plank-with-arm-raised.webp
+cp side-plank-left.webp side-plank-hip-dips-left.webp; cp side-plank-right.webp side-plank-hip-dips-right.webp
+cp leg-up-side-plank-left.webp side-plank-with-left-leg-raised.webp; cp leg-up-side-plank-right.webp side-plank-with-right-leg-raised.webp
+cp jumping-jacks.webp star-jumps.webp; cp bridge.webp butt-bridge.webp
+cp downward-facing-dog.webp plank-to-pike.webp; cp mountain-climber.webp mountain-climber-squat-thrust.webp
+cp straight-arm-plank.webp plank-up-downs.webp; cp reclined-oblique-twist.webp russian-twist.webp
+cp v-hold.webp v-crunch.webp; cp v-hold.webp alt-v-up.webp; cp reverse-crunches.webp reverse-crunches-with-leg-raised.webp
