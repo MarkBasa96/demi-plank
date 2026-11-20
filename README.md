@@ -224,7 +224,12 @@ node tools/serve.mjs           # serve the app at http://127.0.0.1:5173
 | `node tools/tap-test.mjs` | Full tap-through test in headless Edge (see Testing). |
 | `node tools/coverage.mjs` | Lists any move that has no picture. |
 | `node tools/readme-shots.mjs` | Retakes the screenshots in this README. |
-| `node tools/build-data.mjs` | Rebuilds the written-out plans from the spec. |
+| `node tools/build-data.mjs` | Rebuilds the written-out plans from the spec. Needs `DEMI_VAULT` (see below). |
+| `node tools/make-frames.mjs` | Cuts the animation-frame sheets into `pics/<id>-2.webp` / `-3.webp` and writes `js/data/frames.js`. Needs `DEMI_VAULT`. |
+| `node tools/ref-sheet.cjs` | Builds a reference sheet of stills to feed an image tool. |
+| `bash tools/rebuild-pics.sh` | Rebuilds every picture from the source sheets. Needs `DEMI_VAULT`. |
+
+**Source sheets.** The picture sheets and the plan spec the pictures were cut from are kept outside this repo. The picture and data scripts read their folder from the `DEMI_VAULT` environment variable (a folder containing `02-process/plan-data.md` and `03-outputs/pictures/`). You do not need them to run or change the app: the finished pictures are already in `pics/`.
 
 **Adding a move:** add its name and steps (`js/data/moves.js`, `steps.js`, `about.js`), drop `pics/<move-id>.webp` (4:3, transparent
 background), then run `build-sw.mjs`. A move with no picture shows a simple line figure until one exists.
@@ -317,7 +322,8 @@ keep-screen-on and a version number from the build number (the text-to-speech pl
 
 - **Illustrations and logo:** original artwork made for this project (the cat is Demi). The move pictures were produced with AI image
   tools and then cut out, resized and optimised with `sharp`.
-- **All exercise text, coaching lines and plans** are written for this project. The layout follows a common plank-app pattern; no code, art or text from any other app is used.
+- **Exercise text, coaching lines and step-by-step instructions** are written for this project. The workout plans were modelled on a commercial plank-workout app: the exercise names are common, generic ones and the timings are plain numbers, but the wording, code and art are all new. No code, art, text or sound from any other app is used.
+- **Not affiliated with, endorsed by or connected to** any other plank or fitness app or company.
 - **Roboto Condensed** (Copyright 2011 Google Inc.), licensed under the [SIL Open Font License 1.1](fonts/LICENSE-OFL.txt).
 - **Capacitor** (MIT) is used only for the Android wrapper.
 

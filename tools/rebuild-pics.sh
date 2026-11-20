@@ -1,6 +1,8 @@
 #!/bin/bash
 # Rebuilds every picture from the saved sheets (in the vault: 03-outputs/pictures/sheets). Run from the repo root.
-B="PATH-TO-VAULT/03-projects/plank-workout/03-outputs/pictures"
+# Set DEMI_VAULT to the project folder that holds 03-outputs/pictures (the sheets are not part of this repo).
+: "${DEMI_VAULT:?set DEMI_VAULT}"
+B="$DEMI_VAULT/03-outputs/pictures"
 M="node tools/make-pics.mjs"
 rm -f pics/*.webp
 $M "$B/reference/option-B.png" 1x1 plank

@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SPEC = 'PATH-TO-VAULT/03-projects/plank-workout/02-process/plan-data.md';
+// Folder with the source files for the pictures and plan data (not part of this repo). Set DEMI_VAULT to it.
+const VAULT = process.env.DEMI_VAULT; if (!VAULT) { console.error('Set DEMI_VAULT to the project folder that holds 02-process/plan-data.md'); process.exit(1); }
+const SPEC = VAULT + '/02-process/plan-data.md';
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'js', 'data');
 const md = fs.readFileSync(SPEC, 'utf8').split(/\r?\n/);
 

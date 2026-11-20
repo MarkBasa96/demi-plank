@@ -11,7 +11,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PICS = path.join(ROOT, 'pics');
-const SHEETS = 'PATH-TO-VAULT/03-projects/plank-workout/03-outputs/pictures/sheets/frames/';
+// Folder with the source sheets (not part of this repo). Set DEMI_VAULT to the project folder that holds 03-outputs/pictures/sheets/frames/.
+if (!process.env.DEMI_VAULT) { console.error('Set DEMI_VAULT to the project folder that holds 03-outputs/pictures/'); process.exit(1); }
+const SHEETS = process.env.DEMI_VAULT + '/03-outputs/pictures/sheets/frames/';
 const KEEP_DUPS = process.argv.includes('--keep-dups');
 const W = 640, H = 480;
 
