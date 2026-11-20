@@ -40,3 +40,6 @@ cp side-plank-left.webp left-side-plank-with-arm-raised.webp; cp side-plank-righ
 cp leg-up-side-plank-left.webp side-plank-with-left-leg-raised.webp; cp leg-up-side-plank-right.webp side-plank-with-right-leg-raised.webp
 cp jumping-jacks.webp star-jumps.webp; cp bridge.webp butt-bridge.webp
 cp reverse-crunches.webp reverse-crunches-with-leg-raised.webp
+
+# Extra animation frames (pics/<id>-2.webp, -3.webp) from the Flow frame sheets
+node tools/make-frames.mjs

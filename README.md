@@ -10,7 +10,7 @@
 [![Offline](https://img.shields.io/badge/works-offline-7283FF)](#how-it-works-offline)
 [![No ads](https://img.shields.io/badge/ads-none-2FBF71)](#privacy)
 [![No accounts](https://img.shields.io/badge/accounts-none-2FBF71)](#privacy)
-[![Tests](https://img.shields.io/badge/tests-215%20passing-2FBF71)](#testing)
+[![Tests](https://img.shields.io/badge/tests-222%20passing-2FBF71)](#testing)
 [![Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-5565F0)](#tech)
 
 ![Demi Plank on a phone: the Plan, a workout, a rest, and the Reports screen](docs/screenshots/hero.png)
@@ -47,6 +47,9 @@ and no server that ever sees your data.
 ---
 
 ## Screenshots
+
+<p align="center"><img src="docs/screenshots/animated-moves.gif" width="520" alt="Three moves looping: plank, jumping jacks and sit-ups"></p>
+<p align="center"><sub>The flip-book pictures (plank, jumping jacks, sit-ups), made by <a href="tools/readme-anim.cjs"><code>tools/readme-anim.cjs</code></a>.</sub></p>
 
 All screenshots are the real app at iPhone size (390 × 844), taken by [`tools/readme-shots.mjs`](tools/readme-shots.mjs) with sample data.
 
@@ -86,7 +89,10 @@ All screenshots are the real app at iPhone size (390 × 844), taken by [`tools/r
   talks over itself, keeps the last 10 seconds for the countdown, and does not repeat steps it already said.
 - **Step-by-step "?" for all 132 moves.** Tap **?** in a workout or any exercise in a list to see numbered steps and a "watch out" box.
   The sheet fits any screen size, from a small iPhone to a tablet, in portrait or landscape.
-- **Our own pictures.** Every move has its own original illustration.
+- **Our own pictures, and they move.** Every move has its own original illustration. Most also have 2 or 3 extra frames that loop like
+  a flip-book (not a video), so you can see how to get into the move and how it travels. Holds show "getting in", then "in position";
+  moving moves go start, middle, end. Only the big picture in a workout and in the "?" sheet moves, the small list pictures stay still
+  to save battery, and with the phone's **Reduce Motion** setting on, only the first picture shows.
 - **Settings.** Mute, voice guide, explain exercises, tips and motivation, coach voice, rest time (default or your own), units (lb/kg, in/cm).
 
 **Tracking**
@@ -179,7 +185,7 @@ demi-plank/
 ├── css/app.css              All styling. Responsive (phones, tablets, landscape).
 ├── fonts/                   Roboto Condensed (SIL OFL), bundled for offline use.
 ├── icons/                   App icons.
-├── pics/                    One illustration per move (132, WebP, 4:3).
+├── pics/                    One illustration per move (132, WebP, 4:3) plus <id>-2 / <id>-3 extra frames for 115 of them.
 ├── js/
 │   ├── app.js               Start-up, one click handler for the whole app, pause on hide.
 │   ├── store.js             localStorage: load, validate, save, flush.
@@ -231,11 +237,12 @@ Two layers, both run locally:
 
 - **Plan engine** (`tools/test-engine.mjs`): 3,362 sessions across 140 levels. Checks the 40-minute cap, hold caps, rest days,
   test days and growth between cycles.
-- **Tap-through test** (`tools/tap-test.mjs`): **215 checks** that drive the real app in headless Microsoft Edge at iPhone size with **real touch taps**.
+- **Tap-through test** (`tools/tap-test.mjs`): **222 checks** that drive the real app in headless Microsoft Edge at iPhone size with **real touch taps**.
   Each check reads a saved value or visible text, not just "no error". It covers:
   - all five tabs, the Challenge (start, quit, record), Library, Plan (select, edit, replace, duration, reset, level chooser, My training);
   - full workouts: ready, move, rest, pause, previous, next, +20 s, done, level complete, and a test day at Master cycle 2;
   - Reports (weight, height, BMI, history) and Mine (sound, rest, units, restart, delete);
+  - the flip-book pictures: extra frames in a workout and in the "?" sheet, still thumbnails, reduced motion shows frame 1 only, every listed frame loads;
   - the how-to sheet for all 132 moves, at six screen sizes from 320 px wide to a tablet and landscape;
   - the Android voice path, using a stand-in for the native speech plugin (English voices only, tips never talk over the coach,
     a countdown cuts in, stop silences);
@@ -301,7 +308,7 @@ keep-screen-on and a version number from the build number (the text-to-speech pl
 - **Expert and Master peak at about 31 minutes** by this app's timing, because the per-exercise hold caps bind before the 40-minute limit.
 - **Voice quality depends on the phone.** The app uses the phone's installed voices; on iPhone, downloading an Enhanced voice
   (Settings → Accessibility → Spoken Content → Voices) sounds noticeably better.
-- A few near-identical moves share one picture.
+- A few near-identical moves share one picture. Of the 132 moves, 115 have a second frame and 28 a third; plank jacks, plank up-downs, one-down-two-ups and alt V-up have one picture only. On side-to-side moves the "other side" frame often came out the same as the middle one, so those loop in 2 frames. Regenerate individual frames in Google Flow with `tools/ref-sheet.cjs` and `tools/make-frames.mjs`.
 - Ideas: export/import of progress, more routines, a light theme.
 
 ---

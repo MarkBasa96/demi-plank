@@ -1,0 +1,88 @@
+abdominal-crunches: F2 F3  d12=26.2% d23=24.0% 
+alternating-hooks: F2 F3  d12=25.0% d23=23.0% 
+backward-lunge: F2 -  d12=5.0% d23=1.5% F3 same as previous (1.5%) dropped; 
+bicycle-crunches: F2 F3  d12=50.4% d23=31.2% 
+bird-dog: F2 F3  d12=51.0% d23=4.7% 
+body-saw: F2 -  d12=26.4% d23=2.2% F3 same as previous (2.2%) dropped; 
+bridge: F2 -  d12=12.5% d23=3.3% F3 same as previous (3.3%) dropped; 
+butt-bridge: F2 -  d12=13.5% d23=3.3% F3 same as previous (3.3%) dropped; 
+butt-kicks: F2 -  d12=12.5% d23=2.3% F3 same as previous (2.3%) dropped; 
+calf-stretch-left: F2 -  d12=55.1% d23=n/a 
+cat-cow-pose: F2 F3  d12=37.4% d23=37.2% 
+chest-stretch: F2 -  d12=36.2% d23=n/a 
+child-s-pose: F2 -  d12=63.9% d23=n/a 
+cobra-stretch: F2 -  d12=54.0% d23=n/a 
+copenhagen-side-plank-left: F2 -  d12=34.8% d23=n/a 
+cross-leg-side-bend-left: F2 -  d12=56.0% d23=n/a 
+crunch-kicks: F2 F3  d12=27.3% d23=16.9% 
+diagonal-plank-hold-left: F2 -  d12=36.3% d23=n/a 
+downward-facing-dog: F2 F3  d12=28.7% d23=15.8% 
+dynamic-chest: F2 F3  d12=18.9% d23=27.0% 
+fast-spider-lunges: F2 F3  d12=9.5% d23=4.8% 
+flutter-kicks: F2 F3  d12=37.4% d23=6.4% 
+heel-touch: F2 -  d12=23.3% d23=1.7% F3 same as previous (1.7%) dropped; 
+heels-to-the-heavens: F2 -  d12=9.0% d23=2.0% F3 same as previous (2.0%) dropped; 
+high-stepping: F2 -  d12=9.6% d23=2.3% F3 same as previous (2.3%) dropped; 
+hollow-body-hold: F2 -  d12=64.5% d23=n/a 
+jumping-jacks: F2 F3  d12=45.6% d23=44.0% 
+jumping-squats: F2 F3  d12=68.6% d23=66.8% 
+knee-plank: F2 -  d12=51.2% d23=n/a 
+knee-to-elbow-crunches: F2 F3  d12=48.7% d23=10.1% 
+kneeling-copenhagen-side-plank-left: F2 -  d12=21.6% d23=n/a 
+kneeling-side-plank-left: F2 -  d12=57.7% d23=n/a 
+left-quad-stretch-with-wall: F2 -  d12=42.5% d23=n/a 
+left-side-plank-with-arm-raised: F2 -  d12=33.7% d23=n/a 
+leg-raised-plank-left: F2 -  d12=38.8% d23=n/a 
+leg-raises: F2 F3  d12=32.3% d23=55.5% 
+leg-up-side-plank-left: F2 -  d12=45.1% d23=n/a 
+long-lever-plank: - -  d12=1.9% d23=n/a F2 same as F1 (1.9%) dropped; 
+long-lever-single-leg-plank-left: F2 -  d12=24.8% d23=n/a 
+lying-butterfly-stretch: F2 -  d12=66.9% d23=n/a 
+lying-twist-stretch-left: F2 -  d12=64.8% d23=n/a 
+max-plank-test: F2 -  d12=27.6% d23=n/a 
+modified-burpees: F2 F3  d12=75.2% d23=87.0% 
+modified-push-up-low-hold: F2 -  d12=73.8% d23=n/a 
+mountain-climber: F2 -  d12=29.7% d23=3.2% F3 same as previous (3.2%) dropped; 
+mountain-climber-squat-thrust: F2 F3  d12=7.0% d23=33.0% 
+open-chain-knee-extension-left: F2 -  d12=34.7% d23=n/a 
+pilates-clamshell-left: F2 -  d12=41.8% d23=n/a 
+plank: F2 -  d12=27.6% d23=n/a 
+plank-and-reach-left: F2 -  d12=34.5% d23=n/a 
+plank-hip-dips: F2 -  d12=28.9% d23=2.0% F3 same as previous (2.0%) dropped; 
+plank-shoulder-taps: F2 F3  d12=31.6% d23=5.0% 
+plank-to-pike: F2 -  d12=8.5% d23=3.1% F3 same as previous (3.1%) dropped; 
+plank-with-left-arm-lift: F2 -  d12=52.3% d23=n/a 
+punches: F2 -  d12=15.8% d23=2.7% F3 same as previous (2.7%) dropped; 
+quarter-wall-squat: F2 -  d12=44.1% d23=n/a 
+reclined-oblique-twist: F2 -  d12=70.2% d23=3.1% F3 same as previous (3.1%) dropped; 
+reverse-crunches: F2 F3  d12=27.0% d23=19.6% 
+reverse-crunches-with-leg-raised: F2 -  d12=31.2% d23=3.3% F3 same as previous (3.3%) dropped; 
+reverse-plank: F2 -  d12=61.4% d23=n/a 
+reverse-plank-with-left-leg-raised: F2 -  d12=22.9% d23=n/a 
+rkc-plank: F2 -  d12=25.6% d23=n/a 
+russian-twist: F2 F3  d12=22.4% d23=22.9% 
+side-plank-hip-dips-left: F2 F3  d12=7.4% d23=68.3% 
+side-plank-left: F2 -  d12=50.0% d23=n/a 
+side-plank-with-left-leg-raised: F2 -  d12=44.7% d23=n/a 
+single-arm-single-leg-plank-left: F2 -  d12=36.3% d23=n/a 
+single-left-leg-plank: F2 -  d12=39.3% d23=n/a 
+sit-up-twist: F2 F3  d12=5.6% d23=39.3% 
+sit-ups: F2 F3  d12=29.7% d23=46.2% 
+sitting-hamstring-stretch-left: F2 -  d12=70.5% d23=n/a 
+spiderman-plank: F2 -  d12=33.9% d23=3.5% F3 same as previous (3.5%) dropped; 
+standing-biceps-stretch-left: F2 -  d12=25.1% d23=n/a 
+standing-side-bend: F2 -  d12=51.1% d23=n/a 
+star-jumps: F2 F3  d12=63.7% d23=71.0% 
+star-side-plank-left: F2 -  d12=49.0% d23=n/a 
+straight-arm-knee-plank: F2 -  d12=42.0% d23=n/a 
+straight-arm-plank: F2 -  d12=29.6% d23=n/a 
+straight-leg-raise-left: F2 -  d12=38.2% d23=n/a 
+torso-twist: F2 -  d12=18.0% d23=3.0% F3 same as previous (3.0%) dropped; 
+triangle-pose-left: F2 -  d12=68.0% d23=n/a 
+triceps-stretch-left: F2 -  d12=31.1% d23=n/a 
+v-crunch: F2 F3  d12=31.1% d23=4.5% 
+v-hold: F2 F3  d12=46.4% d23=71.8% 
+weighted-plank: F2 -  d12=34.7% d23=n/a 
+wide-arm-plank: F2 -  d12=8.8% d23=n/a 
+x-burpees: F2 F3  d12=82.9% d23=86.2% 
+x-man-crunch: F2 F3  d12=45.6% d23=48.2% 

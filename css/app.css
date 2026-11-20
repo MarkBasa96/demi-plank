@@ -213,3 +213,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .watch b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--act)}
 .sheetbtns{margin-top:12px;display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:calc(-1 * (var(--sab) + 18px));background:linear-gradient(rgba(255,255,255,0),#fff 28%);padding:14px 0 2px}
 @media (orientation:landscape) and (max-height:520px){.sheet{max-height:100vh;max-height:100dvh;border-radius:16px 16px 0 0}.sheet .stage{max-height:34dvh}}
+
+/* Flip-book pictures: extra frames stacked on frame 1, one shown per 0.6 s step (no JS timer).
+   fl-21 = hold: getting in, then in position | fl-1232 = moving move | fl-1213 = side to side, neutral beat between */
+.figw .pf{opacity:0}
+.fl-21 .pic:not(.pf){animation:fa21 1.2s steps(1) infinite}.fl-21 .pf2{animation:fb21 1.2s steps(1) infinite}
+@keyframes fa21{0%{opacity:0}50%{opacity:1}}@keyframes fb21{0%{opacity:1}50%{opacity:0}}
+.fl-1232 .pic:not(.pf){animation:fa1232 2.4s steps(1) infinite}.fl-1232 .pf2{animation:fb1232 2.4s steps(1) infinite}.fl-1232 .pf3{animation:fc1232 2.4s steps(1) infinite}
+@keyframes fa1232{0%{opacity:1}25%{opacity:0}}@keyframes fb1232{0%{opacity:0}25%{opacity:1}50%{opacity:0}75%{opacity:1}}@keyframes fc1232{0%{opacity:0}50%{opacity:1}75%{opacity:0}}
+.fl-1213 .pic:not(.pf){animation:fa1213 2.4s steps(1) infinite}.fl-1213 .pf2{animation:fb1213 2.4s steps(1) infinite}.fl-1213 .pf3{animation:fc1213 2.4s steps(1) infinite}
+@keyframes fa1213{0%{opacity:1}25%{opacity:0}50%{opacity:1}75%{opacity:0}}@keyframes fb1213{0%{opacity:0}25%{opacity:1}50%{opacity:0}}@keyframes fc1213{0%{opacity:0}75%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.fl .pic:not(.pf){animation:none!important;opacity:1!important}.fl .pf{animation:none!important;opacity:0!important}}

@@ -1,4 +1,5 @@
 import { movePose } from '../data/moves.js';
+import { FRAMES } from '../data/frames.js';
 
 export const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -23,7 +24,7 @@ export const I = {
 };
 
 /** Placeholder line figure on a 4:3 canvas. A real picture at pics/<id>.webp replaces it automatically. */
-export function fig(id, w = 120, poseOverride) {
+export function fig(id, w = 120, poseOverride, anim = false) {
   const pose = poseOverride || movePose(id), ink = '#252D4A', top = '#4AA3DF', mat = '#BFE3F7';
   const P = {
     plank: `<path d="M215 292 L215 372 L290 372" stroke="${ink}" fill="none"/><path d="M455 312 L565 372" stroke="${ink}" fill="none"/><path d="M205 288 L450 308" stroke="${top}" stroke-width="50" fill="none"/><circle cx="165" cy="272" r="26" fill="#fff" stroke="${ink}"/>`,
@@ -31,7 +32,9 @@ export function fig(id, w = 120, poseOverride) {
     stretch: `<path d="M320 150 L320 300 L260 372 M320 300 L390 372" stroke="${ink}" fill="none"/><path d="M320 180 L260 130 M320 180 L385 130" stroke="${ink}" fill="none"/><path d="M320 175 L320 285" stroke="${top}" stroke-width="56" fill="none"/><circle cx="320" cy="118" r="26" fill="#fff" stroke="${ink}"/>`,
   };
   const h = Math.round(w * .75);
-  return `<span class="figw" style="width:${w}px;height:${h}px"><svg class="fig" width="${w}" height="${h}" viewBox="0 0 640 480" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="320" cy="392" rx="270" ry="22" fill="${mat}" stroke="none"/>${P[pose] || P.stretch}</svg><img class="pic" src="pics/${esc(id)}.webp" width="${w}" height="${h}" alt="" decoding="async"></span>`;
+  const order = anim ? FRAMES[id] : null;
+  const extra = order ? [2, 3].filter(n => order.includes(String(n))).map(n => `<img class="pic pf pf${n}" src="pics/${esc(id)}-${n}.webp" width="${w}" height="${h}" alt="" decoding="async">`).join('') : '';
+  return `<span class="figw${order ? ' fl fl-' + order : ''}" style="width:${w}px;height:${h}px"><svg class="fig" width="${w}" height="${h}" viewBox="0 0 640 480" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="320" cy="392" rx="270" ry="22" fill="${mat}" stroke="none"/>${P[pose] || P.stretch}</svg><img class="pic" src="pics/${esc(id)}.webp" width="${w}" height="${h}" alt="" decoding="async">${extra}</span>`;
 }
 export const demi = (w) => `<img src="icons/demi.png" width="${w}" height="${w}" alt="Demi" style="display:block;margin:0 auto;object-fit:contain">`;
 export const q = '<button class="q" data-act="faq" aria-label="Common questions">?</button>';

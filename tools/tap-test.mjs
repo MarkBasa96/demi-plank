@@ -102,7 +102,7 @@ const FAKE_SPEECH = `(() => { const log=[]; let speaking=false, t=0; const vs=['
   const synth={ get speaking(){return speaking}, get pending(){return false}, getVoices:()=>vs, addEventListener(){}, resume(){}, cancel(){ log.push({c:1}); speaking=false; clearTimeout(t); }, speak(u){ if(speaking) window.__speech.violations++; log.push({s:u.text, v:u.voice&&u.voice.name}); speaking=true; clearTimeout(t); t=setTimeout(()=>{speaking=false}, 2500); } };
   window.__speech={log, violations:0}; Object.defineProperty(window,'speechSynthesis',{value:synth,configurable:true}); })()`;
 await cdp('Page.addScriptToEvaluateOnNewDocument', { source: FAKE_SPEECH });
-await cdp('Page.navigate', { url: URL0 }); await sleep(900);
+await cdp('Page.navigate', { url: URL0 }); await sleep(300); await waitFor(`!!document.querySelector('.tab')`, 10000);
 
 try {
   // ---------------- 0. first load, service worker ----------------
@@ -361,7 +361,7 @@ try {
   await inject(`localStorage.setItem('${KEY}', '{broken json')`); await sleep(200);
   check('Corrupt save: unreadable original kept as a backup copy', (await ev(`localStorage.getItem('${KEY}:corrupt')`)) === '{broken json');
   const sid = (await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `Object.defineProperty(window,'localStorage',{get(){throw new Error('blocked')}})` })).result.identifier;
-  await cdp('Page.reload'); await sleep(900);
+  await cdp('Page.reload'); await sleep(300); await waitFor(`!!document.querySelector('.tab')`, 10000);
   check('Blocked storage (private window): app still works', (await count('.tab')) === 5);
   await act('tab', { text: 'Reports' }); await act('weightdlg'); await typeInto('#wval', '160'); await act('weightsave');
   check('Blocked storage: no crash when saving', (await count('.tab')) === 5 && !(await text()).includes('Something went wrong'));
@@ -399,7 +399,23 @@ try {
   const sp3 = JSON.parse(await ev('JSON.stringify(window.__speech)')); const lines3 = sp3.log.slice(spBefore).filter(x => x.s && x.s.trim()).map(x => x.s);
   check('Live: during the hold the coach explains the steps', lines3.slice(1).some(t => /^Then, Hold, then lower|^Watch out/.test(t)), lines3.slice(1).join(' | ').slice(0, 200));
   check('Live: nothing ever queued behind another line', sp3.violations === 0, 'overlaps ' + sp3.violations);
+  // ---------------- 9b2. animated pictures (flip-book) ----------------
+  check('Animated picture: the big picture in a workout has extra frames', (await count('.stage2 .figw.fl .pf')) >= 1, 'frames ' + await count('.stage2 .figw.fl .pf'));
+  check('Animated picture: loop is a CSS animation (no timer)', (await ev(`getComputedStyle(document.querySelector('.stage2 .figw.fl .pf2')).animationName`)) !== 'none');
+  await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }); await sleep(200);
+  check('Reduced motion: only frame 1 shows (no animation, extra frames hidden)', (await ev(`(() => { const f = document.querySelector('.stage2 .figw.fl'); const a = getComputedStyle(f.querySelector('.pic:not(.pf)')), b = getComputedStyle(f.querySelector('.pf2')); return a.animationName === 'none' && a.opacity === '1' && b.animationName === 'none' && b.opacity === '0'; })()`)) === true);
+  await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
   await act('wquit'); await act('giveupquit');
+  if (!(await exists('.thumb'))) { await act('tab', { text: 'Library' }); await act('libopen', { data: { id: 'morning-warmup' } }); }
+  check('Animated picture: list thumbnails stay still', (await count('.thumb')) >= 3 && (await count('.thumb .fl')) === 0 && (await count('.thumb .pf')) === 0, 'thumbs ' + await count('.thumb'));
+  await act('mvsheet', { nth: 0 });
+  check('Animated picture: the "?" sheet picture has extra frames', (await count('.sheet .stage .figw.fl .pf')) >= 1);
+  await act('dlgclose');
+  const bad = JSON.parse(await ev(`(async () => { const m = await import('/js/data/frames.js'); const bad = []; for (const [id, o] of Object.entries(m.FRAMES)) for (const n of [2, 3]) { if (!o.includes(String(n))) continue; const r = await fetch('pics/' + id + '-' + n + '.webp'); if (!r.ok) bad.push(id + '-' + n); } return JSON.stringify(bad); })()`));
+  check('Every frame listed in frames.js exists and loads (no 404)', bad.length === 0, bad.slice(0, 5).join(','));
+  const nofig = JSON.parse(await ev(`(async () => { const m = await import('/js/data/frames.js'); const bad = []; for (const id of Object.keys(m.FRAMES)) { const r = await fetch('pics/' + id + '.webp'); if (!r.ok) bad.push(id); } return JSON.stringify(bad); })()`));
+  check('Every animated move still has its frame-1 picture', nofig.length === 0, nofig.slice(0, 5).join(','));
+  await act('back');
 
   // ---------------- 9c. Android app: native text-to-speech (stubbed plugin) ----------------
   const nat = JSON.parse(await ev(`(async () => {

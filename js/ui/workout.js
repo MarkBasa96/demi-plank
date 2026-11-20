@@ -52,7 +52,7 @@ views.workout = () => {
   const cu = p.countUp;
   return `<div class="screen light"><div class="prog">${segs}</div><div class="wtop"><button class="icon-btn" data-act="wquit" aria-label="Back" style="color:var(--ink)">${I.back}</button>
     <div class="row" style="gap:10px"><button class="icon-btn rnd" data-act="mute" aria-label="Sound">${spk()}</button><button class="icon-btn rnd" data-act="whow" aria-label="How to">?</button></div></div>
-    <div class="stage2">${fig(it.id, 380)}</div>
+    <div class="stage2">${fig(it.id, 380, undefined, true)}</div>
     <div class="bignum"><span id="pn" class="s cond">${cu ? mmss(p.elapsed) : p.remaining + '"'}</span>${cu ? '' : `<span class="t cond">/${it.secs}"</span>`}${cu ? '' : rateHtml}</div>
     <div class="mvname cond ${p.paused ? 'paused' : ''}">${p.paused ? 'PAUSED' : esc(moveName(it.id))}</div>
     ${cu ? `<div class="slider" data-slider="test"><div class="lbl">Slide to complete</div><div class="knob">»</div></div>` : `<div class="cbar"><div id="pf" class="fill" style="width:${(p.fraction * 100).toFixed(1)}%"></div><button data-act="wprev" aria-label="Previous">${I.prev}</button><button class="main" data-act="wpause" aria-label="${p.paused ? 'Resume' : 'Pause'}">${p.paused ? I.play : I.pause}</button><button data-act="wskip" aria-label="Next">${I.next}</button></div>`}</div>`;

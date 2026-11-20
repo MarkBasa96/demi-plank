@@ -10,3 +10,6 @@ for (const w of LIBRARY) for (const m of (w.moves || w.levels.flatMap(l => l.mov
 const miss = [...used].filter(([id]) => !have.has(id));
 console.log('moves used:', used.size, '| pictures:', used.size - miss.length, '| missing:', miss.length);
 for (const where of ['warm/cool', 'plan', 'library']) { const l = miss.filter(([, s]) => s.has(where) && (where === 'library' ? s.size === 1 : true)).map(([id]) => id); if (l.length) console.log(`\n${where} (${l.length}):\n  ` + l.join(', ')); }
+// Frames per move (flip-book): pics/<id>-2.webp, -3.webp
+{ const f2 = [...have].filter(n => /-2$/.test(n) && have.has(n.slice(0, -2))).length, f3 = [...have].filter(n => /-3$/.test(n) && have.has(n.slice(0, -2))).length;
+  console.log(`\nframes: ${f2} moves have frame 2, ${f3} have frame 3 (others stay single pictures)`); }
