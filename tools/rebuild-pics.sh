@@ -27,17 +27,16 @@ $M "$B/sheets/sheet-21-flow-hiit2.jpg" 2x2 "punches,plank-jacks,fast-spider-lung
 $M "$B/sheets/sheet-22-flow-abs.jpg" 2x2 "x-man-crunch,crunch-kicks,heels-to-the-heavens,sit-up-twist"
 $M "$B/sheets/sheet-23-flow-abs2.jpg" 2x2 "alternating-hooks,one-down-two-ups,seated-abs-clockwise-circles,seated-abs-counterclockwise-circles"
 $M "$B/sheets/sheet-24-flow-reverse.jpg" 2x2 "reverse-plank,reverse-plank-with-left-leg-raised,reverse-plank-with-right-leg-raised,plank-hip-dips"
+$M "$B/sheets/sheet-25-flow-dedicated1.jpg" 2x2 "plank-up-downs,plank-to-pike,mountain-climber-squat-thrust,russian-twist"
+$M "$B/sheets/sheet-26-flow-dedicated2.jpg" 2x2 "v-crunch,alt-v-up,rkc-plank,weighted-plank"
+$M "$B/sheets/sheet-27-flow-dedicated3.jpg" 2x2 "long-lever-single-leg-plank-left>long-lever-single-leg-plank-right,side-plank-hip-dips-left>side-plank-hip-dips-right,wide-arm-plank,standing-biceps-stretch-left>standing-biceps-stretch-right"
 cd pics
 # same-pose aliases (honest approximations; replace with dedicated art when it exists)
 cp diagonal-plank-hold-left.webp single-arm-single-leg-plank-left.webp; cp diagonal-plank-hold-right.webp single-arm-single-leg-plank-right.webp
 cp plank-with-left-arm-lift.webp plank-and-reach-left.webp; cp plank-with-right-arm-lift.webp plank-and-reach-right.webp
 cp leg-raised-plank-left.webp single-left-leg-plank.webp; cp leg-raised-plank-right.webp single-right-leg-plank.webp
-cp long-lever-plank.webp long-lever-single-leg-plank-left.webp; cp long-lever-plank.webp long-lever-single-leg-plank-right.webp
-cp plank.webp max-plank-test.webp; cp plank.webp rkc-plank.webp; cp plank.webp weighted-plank.webp
+cp plank.webp max-plank-test.webp
 cp side-plank-left.webp left-side-plank-with-arm-raised.webp; cp side-plank-right.webp right-side-plank-with-arm-raised.webp
-cp side-plank-left.webp side-plank-hip-dips-left.webp; cp side-plank-right.webp side-plank-hip-dips-right.webp
 cp leg-up-side-plank-left.webp side-plank-with-left-leg-raised.webp; cp leg-up-side-plank-right.webp side-plank-with-right-leg-raised.webp
 cp jumping-jacks.webp star-jumps.webp; cp bridge.webp butt-bridge.webp
-cp downward-facing-dog.webp plank-to-pike.webp; cp mountain-climber.webp mountain-climber-squat-thrust.webp
-cp straight-arm-plank.webp plank-up-downs.webp; cp reclined-oblique-twist.webp russian-twist.webp
-cp v-hold.webp v-crunch.webp; cp v-hold.webp alt-v-up.webp; cp reverse-crunches.webp reverse-crunches-with-leg-raised.webp
+cp reverse-crunches.webp reverse-crunches-with-leg-raised.webp
