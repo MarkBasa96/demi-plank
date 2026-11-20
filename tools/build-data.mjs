@@ -94,16 +94,13 @@ function parseList(text) {
   for (let tok of text.split(' / ')) {
     tok = tok.trim().replace(/\.$/, '');
     const x2 = /\sx2$/.test(tok); tok = tok.replace(/\sx2$/, '');
-    let m = tok.match(/^(.+?)\s+(\d+:\d\d)$/);
-    if (!m) { // "right 0:20" style: reuse previous name with left->right
-      const m2 = tok.match(/^(left|right)\s+(\d+:\d\d)$/);
-      if (m2 && items.length) {
-        const prev = items[items.length - 1].name;
-        const nm = prev.replace(/\bleft\b/, m2[1]);
-        items.push({ name: nm === prev ? prev + ' ' + m2[1] : nm, secs: secs(m2[2]) }); continue;
-      }
-      console.warn('LIB skip: ' + tok); continue;
+    const m2 = tok.match(/^(left|right)\s+(\d+:\d\d)$/); // "... left 0:20 / right 0:20": reuse the previous name
+    if (m2 && items.length) {
+      const prev = items[items.length - 1].name;
+      items.push({ name: /\bleft\b/.test(prev) ? prev.replace(/\bleft\b/, m2[1]) : prev + ' ' + m2[1], secs: secs(m2[2]) }); continue;
     }
+    const m = tok.match(/^(.+?)\s+(\d+:\d\d)$/);
+    if (!m) { console.warn('LIB skip: ' + tok); continue; }
     items.push({ name: m[1], secs: secs(m[2]) });
     if (x2) items.push({ name: m[1], secs: secs(m[2]) });
   }

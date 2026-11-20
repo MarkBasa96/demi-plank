@@ -16,6 +16,7 @@ function render() {
   let html;
   try { html = t && views[t.v] ? views[t.v]() : tabHtml(); } catch (e) { html = `<div class="screen"><div class="content"><h2 style="margin-top:80px">Something went wrong</h2><p style="margin:12px 0;color:#9AA6C0">${esc(e.message)}</p><button class="pill" data-act="tab" data-v="challenge">Go to start</button></div></div>`; console.error(e); }
   app.innerHTML = html + dialogHtml() + workoutDialog() + (ui.toast ? `<div class="toast">${esc(ui.toast)}</div>` : '');
+  app.querySelectorAll('img.pic').forEach(i => { if (i.complete && i.naturalWidth) covered(i); });
   app.dataset.k = k;
   const prev = SCROLL.get(k);
   if (prev) SELS.forEach(s => { const n = app.querySelector(s); if (n && prev[s]) { n.scrollTop = prev[s][0]; n.scrollLeft = prev[s][1]; } });
@@ -30,6 +31,8 @@ app.addEventListener('click', e => {
 });
 // a placeholder figure is replaced by a real picture only when that picture loads; a missing one just disappears
 document.addEventListener('error', e => { if (e.target?.classList?.contains('pic')) e.target.remove(); }, true);
+const covered = img => { const f = img.previousElementSibling; if (f && f.classList.contains('fig')) f.style.visibility = 'hidden'; };
+document.addEventListener('load', e => { if (e.target?.classList?.contains('pic')) covered(e.target); }, true);
 
 function bindSliders() {
   app.querySelectorAll('[data-slider]').forEach(sl => {
