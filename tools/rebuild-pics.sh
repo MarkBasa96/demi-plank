@@ -22,6 +22,11 @@ $M "$B/sheets/sheet-16-chatgpt-stretch.png" 2x2 "left-quad-stretch-with-wall>rig
 $M "$B/sheets/sheet-17-chatgpt-stretch2.png" 2x2 "lying-twist-stretch-left>lying-twist-stretch-right,cross-leg-side-bend-left>cross-leg-side-bend-right,backward-lunge,quarter-wall-squat"
 $M "$B/sheets/sheet-18-chatgpt-legs.png" 2x2 "open-chain-knee-extension-left>open-chain-knee-extension-right,straight-leg-raise-left>straight-leg-raise-right,pilates-clamshell-left>pilates-clamshell-right,overhead-arm-clockwise-circles>overhead-arm-counterclockwise-circles"
 $M "$B/sheets/sheet-19-chatgpt-standing.png" 2x2 "standing-side-bend,triangle-pose-left>triangle-pose-right,torso-twist,chest-stretch"
+$M "$B/sheets/sheet-20-flow-hiit1.jpg" 2x2 "quick-feet,modified-burpees,jumping-squats,heel-touch"
+$M "$B/sheets/sheet-21-flow-hiit2.jpg" 2x2 "punches,plank-jacks,fast-spider-lunges,x-burpees"
+$M "$B/sheets/sheet-22-flow-abs.jpg" 2x2 "x-man-crunch,crunch-kicks,heels-to-the-heavens,sit-up-twist"
+$M "$B/sheets/sheet-23-flow-abs2.jpg" 2x2 "alternating-hooks,one-down-two-ups,seated-abs-clockwise-circles,seated-abs-counterclockwise-circles"
+$M "$B/sheets/sheet-24-flow-reverse.jpg" 2x2 "reverse-plank,reverse-plank-with-left-leg-raised,reverse-plank-with-right-leg-raised,plank-hip-dips"
 cd pics
 # same-pose aliases (honest approximations; replace with dedicated art when it exists)
 cp diagonal-plank-hold-left.webp single-arm-single-leg-plank-left.webp; cp diagonal-plank-hold-right.webp single-arm-single-leg-plank-right.webp
