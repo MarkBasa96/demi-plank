@@ -17,6 +17,11 @@ $M "$B/sheets/sheet-11-hiit.png" 2x2 jumping-jacks,butt-kicks,high-stepping,brid
 $M "$B/sheets/sheet-12-moving.png" 2x2 -,spiderman-plank,mountain-climber,downward-facing-dog
 $M "$B/sheets/sheet-13-crunch.png" 2x2 abdominal-crunches,bicycle-crunches,sit-ups,leg-raises
 $M "$B/sheets/sheet-14-core.png" 2x2 flutter-kicks,reclined-oblique-twist,v-hold,reverse-crunches
+$M "$B/sheets/sheet-15-redo.png" 2x2 "-,head-tilt,triceps-stretch-left>triceps-stretch-right,shoulder-stretch"
+$M "$B/sheets/sheet-16-chatgpt-stretch.png" 2x2 "left-quad-stretch-with-wall>right-quad-stretch-with-wall,calf-stretch-left>calf-stretch-right,sitting-hamstring-stretch-left>sitting-hamstring-stretch-right,lying-butterfly-stretch"
+$M "$B/sheets/sheet-17-chatgpt-stretch2.png" 2x2 "lying-twist-stretch-left>lying-twist-stretch-right,cross-leg-side-bend-left>cross-leg-side-bend-right,backward-lunge,quarter-wall-squat"
+$M "$B/sheets/sheet-18-chatgpt-legs.png" 2x2 "open-chain-knee-extension-left>open-chain-knee-extension-right,straight-leg-raise-left>straight-leg-raise-right,pilates-clamshell-left>pilates-clamshell-right,overhead-arm-clockwise-circles>overhead-arm-counterclockwise-circles"
+$M "$B/sheets/sheet-19-chatgpt-standing.png" 2x2 "standing-side-bend,triangle-pose-left>triangle-pose-right,torso-twist,chest-stretch"
 cd pics
 # same-pose aliases (honest approximations; replace with dedicated art when it exists)
 cp diagonal-plank-hold-left.webp single-arm-single-leg-plank-left.webp; cp diagonal-plank-hold-right.webp single-arm-single-leg-plank-right.webp
