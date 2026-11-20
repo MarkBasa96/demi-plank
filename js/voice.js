@@ -42,14 +42,14 @@ try { for (const e of ['pointerdown', 'touchend', 'click']) document.addEventLis
 const live = new Set(); // keep references so the browser cannot drop an utterance mid-sentence
 let timer = 0;
 
-/** kind: 'guide' (counts, next move, rest) or 'tip' (coach tips). Respects Sound options. */
+/** kind: 'guide' (counts, next move), 'explain' (how-to lines) or 'tip' (motivation and form tips). Respects Sound options. */
 export function say(text, kind = 'guide', force = false) {
   if (!supported() || !text) return;
   const s = load().settings;
-  if (!force && (s.mute || (kind === 'guide' && !s.voice) || (kind === 'tip' && !s.tips))) return;
+  if (!force && (s.mute || (kind === 'guide' && !s.voice) || (kind === 'tip' && !s.tips) || (kind === 'explain' && !s.explain))) return;
   try {
     const synth = ss(), busy = synth.speaking || synth.pending;
-    if (kind === 'tip' && busy) return; // never talk over the coach
+    if ((kind === 'tip' || kind === 'explain') && busy) return; // explanations and tips never talk over the coach
     const u = new SpeechSynthesisUtterance(text);
     const v = pick(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
     u.rate = 1.02; u.pitch = 1; u.volume = 1;
@@ -60,6 +60,7 @@ export function say(text, kind = 'guide', force = false) {
     else go();
   } catch { /* ignore */ }
 }
+export function isBusy() { try { const s = ss(); return !!s && (s.speaking || s.pending); } catch { return false; } }
 export function stopSpeaking() { try { clearTimeout(timer); ss()?.cancel(); } catch { /* ignore */ } }
 
 // Our own coach tips (short, plain, no hype). Picked at random during holds.

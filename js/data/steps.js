@@ -132,3 +132,4 @@ export function moveSteps(id) {
   return { steps: e[0].map(t => fill(t, side, other)), watch: fill(e[1], side, other) };
 }
 export const STEP_KEYS = () => Object.keys(S);
+export { parse as parseMoveKey };

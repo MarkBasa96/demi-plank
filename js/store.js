@@ -2,7 +2,7 @@
 const KEY = 'demi-plank:v1';
 const DEFAULTS = () => ({
   v: 1,
-  settings: { mute: false, voice: true, tips: true, voiceURI: '', restMode: 'default', restSecs: 20, wUnit: 'lb', hUnit: 'in', warm: true, weighted: false },
+  settings: { mute: false, voice: true, tips: true, explain: true, voiceURI: '', restMode: 'default', restSecs: 20, wUnit: 'lb', hUnit: 'in', warm: true, weighted: false },
   levelIndex: 0,
   progress: {},          // { [levelIndex]: { done: { [day]: ts }, current: 1 } }
   history: [],           // { ts, kind: 'workout'|'challenge', name, secs, kcal, moves, level, day }
@@ -27,7 +27,7 @@ const num = (v, d, lo = -Infinity, hi = Infinity) => (typeof v === 'number' && i
 const pair = x => Array.isArray(x) && typeof x[0] === 'string' && /^[a-z0-9-]+$/.test(x[0]) && typeof x[1] === 'number' && isFinite(x[1]) && x[1] >= 0 && x[1] <= 3600;
 function sanitize(o) {
   const d = DEFAULTS(), s = o.settings;
-  for (const k of ['mute', 'voice', 'tips', 'warm', 'weighted']) s[k] = typeof s[k] === 'boolean' ? s[k] : d.settings[k];
+  for (const k of ['mute', 'voice', 'tips', 'explain', 'warm', 'weighted']) s[k] = typeof s[k] === 'boolean' ? s[k] : d.settings[k];
   s.voiceURI = typeof s.voiceURI === 'string' ? s.voiceURI.slice(0, 300) : '';
   s.restMode = s.restMode === 'custom' ? 'custom' : 'default';
   s.restSecs = num(s.restSecs, 20, 5, 120);

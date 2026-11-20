@@ -159,7 +159,7 @@ try {
   const firstName = await imp('data/moves.js', `m.moveName(${JSON.stringify(await imp('data/library.js', `m.LIBRARY.find(w=>w.id==='morning-warmup').moves[0][0]`))})`);
   await act('libstart', { data: { id: 'morning-warmup' } });
   check('Library START: ready screen shows first move', (await q('.ready .nm')).toLowerCase() === firstName.toLowerCase(), (await q('.ready .nm')) + ' vs ' + firstName);
-  const r1 = await q('#pn'); await sleep(2100); const r2 = await q('#pn'); check('Ready countdown ticks (7 -> down)', Number(r1) - Number(r2) >= 1 && Number(r1) <= 7, `${r1} -> ${r2}`);
+  const r1 = await q('#pn'); await sleep(2100); const r2 = await q('#pn'); check('Ready countdown ticks down (explanations make Ready longer, 7-30 s)', Number(r1) - Number(r2) >= 1 && Number(r1) <= 30 && Number(r1) >= 7, `${r1} -> ${r2}`);
   await act('wquit'); check('Workout back: asks "Why give up?"', (await text()).includes('Why give up'));
   const frozen = await q('#pn'); await sleep(1300); check('Workout: clock stops while the quit question is open', (await q('#pn')) === frozen, frozen + ' -> ' + (await q('#pn')));
   await act('giveupstay'); check('Workout: KEEP GOING returns to the workout', (await exists('.ready')) && !(await text()).includes('Why give up'));
@@ -202,6 +202,7 @@ try {
   st = await state(); check('Sound: Mute saved', st.settings.mute === true);
   await shot('mine-sound'); await act('toggleopt', { data: { k: 'mute' } }); await act('dlgclose');
   st = await state(); check('Sound: Mute toggles back off', st.settings.mute === false && !(await exists('.dialog')));
+  await act('sounddlg'); await act('toggleopt', { data: { k: 'explain' } }); st = await state(); check('Sound: Explain exercises can be switched off', st.settings.explain === false); await act('dlgclose');
   await act('restdlg'); await act('restmode', { data: { m: 'custom' } }); for (let i = 0; i < 3; i++) await act('restdn');
   check('Rest dialog: shows 5 s', (await text()).includes('5 s')); await act('restsave');
   st = await state(); check('Rest time: custom 5 s saved', st.settings.restMode === 'custom' && st.settings.restSecs === 5, JSON.stringify(st.settings));
@@ -374,6 +375,31 @@ try {
   check('Restart progress: progress, history, record cleared; weight kept', Object.keys(st.progress).length === 0 && st.history.length === 0 && st.best === null && st.levelIndex === 0 && st.weights.length === 1, JSON.stringify({ p: st.progress, h: st.history.length, w: st.weights.length }));
   await act('wipedlg'); await act('wipego'); st = await state(); check('Delete all data: everything cleared incl. weight', st.weights.length === 0 && st.settings.restMode === 'default');
   await act('tab', { text: 'Challenge' }); check('After wipe, Challenge shows no record', (await text()).includes('No record at present'));
+
+  // ---------------- 9b. coach script ----------------
+  const cu1 = JSON.parse(await imp('coach.js', `JSON.stringify((() => { const secsOf = m.speechSecs; const plan60 = m.holdPlan('plank', 60), plan20 = m.holdPlan('plank', 20), plan240 = m.holdPlan('plank', 240), noExp = m.holdPlan('plank', 60, { explain: false });
+    const seq = pl => pl.every((x, i) => i === 0 || x.at >= pl[i - 1].at + secsOf(pl[i - 1].text) - 0.01);
+    const within = (pl, D) => pl.every(x => x.at + secsOf(x.text) <= D - 9.9);
+    return { first60: plan60[0].text.slice(0, 12), kinds60: [...new Set(plan60.map(x => x.kind))], seq60: seq(plan60), within60: within(plan60, 60), n20: plan20.length, seq20: seq(plan20), within20: within(plan20, 20), n240: plan240.length, tips240: plan240.filter(x => x.kind === 'tip').length, within240: within(plan240, 240), noExpKinds: [...new Set(noExp.map(x => x.kind))], watch: plan60.some(x => /^Watch out/.test(x.text)),
+      rest20: m.restLine('plank', 20, true).text, heard20: m.restLine('plank', 20, true).heard, rest20len: secsOf(m.restLine('plank', 20, true).text), rest5: m.restLine('plank', 5, true).text, restOff: m.restLine('plank', 20, false).text, heardPlan: m.holdPlan('plank', 60, { heard: 1 }).map(x => x.text.slice(0, 5)), ready: m.readyLine('plank', true), readyOff: m.readyLine('plank', false) }; })())`));
+  check('Coach: a 60 s hold starts with the how-to, then tips, in order, no overlap', cu1.first60 === 'Here is how.' && cu1.kinds60.includes('explain') && cu1.kinds60.includes('tip') && cu1.seq60 && cu1.watch, JSON.stringify(cu1.kinds60));
+  check('Coach: steps already heard during rest are not repeated in the hold', !cu1.heardPlan.includes('Here ') && cu1.heardPlan[0] === 'Then,', cu1.heardPlan.join('|'));
+  check('Coach: nothing is scheduled into the last 10 s (the countdown owns it)', cu1.within60 && cu1.within20 && cu1.within240);
+  check('Coach: short hold gets a little, long hold gets many lines', cu1.n20 >= 1 && cu1.n20 < 6 && cu1.n240 > 8 && cu1.tips240 >= 4, 'n20 ' + cu1.n20 + ' n240 ' + cu1.n240);
+  check('Coach: with Explain off the hold has no how-to lines', !cu1.noExpKinds.includes('explain'), cu1.noExpKinds.join());
+  check('Coach: Rest line names the next move, explains it, and fits the rest time', /^Take a rest. Next, Plank./.test(cu1.rest20) && /Here is how/.test(cu1.rest20) && cu1.heard20 >= 1 && cu1.rest20len <= 20 - 3 + 0.01 && cu1.rest5 === 'Take a rest. Next, Plank.' && cu1.restOff === 'Take a rest. Next, Plank.', cu1.rest20len + ' | ' + cu1.rest5);
+  check('Coach: Ready line is longer with explanations and says what it is for', cu1.ready.secs > 7 && cu1.ready.secs <= 30 && /core/.test(cu1.ready.text) && cu1.readyOff.secs === 7, JSON.stringify(cu1.ready).slice(0, 120));
+  // live: explanations on, a real Library workout
+  st = await state(); check('Explain exercises is on by default (wipe restored defaults)', st.settings.explain === true);
+  await act('tab', { text: 'Library' }); await act('libopen', { data: { id: 'morning-warmup' } }); const spBefore = JSON.parse(await ev('JSON.stringify(window.__speech.log.length)'));
+  await act('libstart', { data: { id: 'morning-warmup' } }); await sleep(2500);
+  const sp2 = JSON.parse(await ev('JSON.stringify(window.__speech)')); const lines2 = sp2.log.slice(spBefore).filter(x => x.s && x.s.trim()).map(x => x.s);
+  check('Live: Ready speaks the name, what it does, and how to do it', lines2.length && /^Get ready. Bridge./.test(lines2[0]) && /glutes/.test(lines2[0]) && /Here is how/.test(lines2[0]), (lines2[0] || '').slice(0, 160));
+  await act('wskip'); await sleep(9000);
+  const sp3 = JSON.parse(await ev('JSON.stringify(window.__speech)')); const lines3 = sp3.log.slice(spBefore).filter(x => x.s && x.s.trim()).map(x => x.s);
+  check('Live: during the hold the coach explains the steps', lines3.slice(1).some(t => /^Then, Hold, then lower|^Watch out/.test(t)), lines3.slice(1).join(' | ').slice(0, 200));
+  check('Live: nothing ever queued behind another line', sp3.violations === 0, 'overlaps ' + sp3.violations);
+  await act('wquit'); await act('giveupquit');
 
   // ---------------- 10. offline ----------------
   await act('tab', { text: 'Library' });

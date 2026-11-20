@@ -1,7 +1,8 @@
 // Workout state machine: ready -> move -> (rest) -> move ... -> done. Time comes from the clock, not from counting ticks,
 // so a throttled timer never makes a hold shorter or longer.
 import { moveName, kcalPerMin } from './data/moves.js';
-import { say, tip, stopSpeaking } from './voice.js';
+import { say, isBusy, stopSpeaking } from './voice.js';
+import { holdPlan, restLine, readyLine } from './coach.js';
 import { load } from './store.js';
 
 export const READY_SECS = 7;
@@ -18,6 +19,7 @@ export class Player {
   }
   get item() { return this.items[this.idx]; }
   get next() { return this.items[this.idx + 1] || null; }
+  get explain() { return load().settings.explain !== false; }
   get restSecs() { const s = load().settings; return s.restMode === 'custom' ? s.restSecs : 20; }
   get remaining() { return Math.max(0, Math.ceil(this.phaseLen - this.acc)); }
   get countUp() { return this.phase === 'move' && this.item.secs === 0; }
@@ -40,17 +42,24 @@ export class Player {
     else if (this.phase === 'move' && !this.countUp) {
       const total = this.item.secs;
       if (r <= 3 && r >= 1 && key('c' + r)) say(String(r));
-      else if (total >= 30 && Math.abs(this.acc - total / 2) < .35 && key('half')) say('Halfway');
+      else if (total >= 30 && Math.abs(this.acc - total / 2) < .35 && !isBusy() && key('half')) say('Halfway');
       else if (total >= 25 && r === 10 && key('ten')) say('10 seconds left');
-      else if (this.item.section === 'main' && total >= 40 && Math.abs(this.acc - total / 3) < .35 && key('tip')) say(tip(), 'tip');
     } else if (this.phase === 'rest' && r === 3 && key('c3')) say('Get ready');
+    if (this.phase === 'move') this.coachPlan();
     if (this.countUp && Math.floor(this.acc) > 0 && Math.floor(this.acc) % 30 === 0 && key('t' + Math.floor(this.acc))) say(Math.floor(this.acc / 60) + ' minutes ' + (Math.floor(this.acc) % 60) + ' seconds');
+  }
+  // while holding: speak the next how-to / motivation line when its time comes and the voice is free
+  coachPlan() {
+    const it = this.plan && this.plan[this.planIdx]; if (!it || this.acc < it.at) return;
+    if (!this.countUp && this.remaining <= 6) { this.planIdx = this.plan.length; return; } // leave the end to the countdown
+    if (isBusy()) return;
+    say(it.text, it.kind); this.planIdx++;
   }
   enterPhase(p, len) {
     this.phase = p; this.acc = 0; this.last = performance.now(); this.paused = false;
-    if (p === 'ready') { this.phaseLen = READY_SECS; say('Get ready. ' + moveName(this.item.id)); }
-    else if (p === 'move') { this.phaseLen = this.item.secs; say(moveName(this.item.id)); }
-    else if (p === 'rest') { this.phaseLen = len; say('Take a rest. Next, ' + moveName(this.next.id)); }
+    if (p === 'ready') { const r = readyLine(this.item.id, this.explain); this.phaseLen = r.secs; this.heard = r.heard; say(r.text); }
+    else if (p === 'move') { this.phaseLen = this.item.secs; say(moveName(this.item.id)); this.plan = holdPlan(this.item.id, this.item.secs, { explain: this.explain, heard: this.heard || 0 }); this.planIdx = 0; this.heard = 0; }
+    else if (p === 'rest') { this.phaseLen = len; const r = restLine(this.next.id, len, this.explain); this.heard = r.heard; say(r.text); }
     this.opts.onChange?.();
   }
   advance() { // phase finished naturally
