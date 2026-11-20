@@ -68,13 +68,14 @@ acts.chalslide = () => { const s = ui.challenge ? ui.challenge.secs : 0; finishC
 
 // ---------- Library ----------
 const COLORS = { 'morning-warmup': '#E6E3FA', 'sleepy-time-stretching': '#DDEBF8', 'belly-fat-burner-hiit': '#F8DDE6', 'knee-pain-relief': '#E4F3E8', 'back-stretching': '#FBEFD9' };
-const wsecs = w => (w.moves || w.levels[0].moves).reduce((a, m) => a + m[1], 0);
+const COVER = { 'morning-warmup': 'jumping-jacks', 'sleepy-time-stretching': 'child-s-pose', 'belly-fat-burner-hiit': 'mountain-climber', 'knee-pain-relief': 'quarter-wall-squat', 'back-stretching': 'cat-cow-pose' };
+const wsecs =w => (w.moves || w.levels[0].moves).reduce((a, m) => a + m[1], 0);
 function libraryTab() {
   const groups = ['ROUTINE', 'HIIT', 'PAIN RELIEF'];
   return `<div class="screen">${topbar('Library')}<div class="content">${groups.map(g => `<div class="sech">${g}</div>${LIBRARY.filter(w => w.group === g).map(w => {
     const moves = w.moves || w.levels[0].moves;
     const meta = w.levels ? 'HIIT · 3 levels' : `${Math.round(wsecs(w) / 60)} mins · ${moves.length} workouts`;
-    return `<button class="lcard" style="background:${COLORS[w.id]}" data-act="libopen" data-id="${w.id}"><h3>${esc(w.name.toUpperCase())}</h3><p>${esc(w.blurb)}</p><span class="chip">${meta}</span>${fig('lib-' + w.id, 180, w.pose)}</button>`;
+    return `<button class="lcard" style="background:${COLORS[w.id]}" data-act="libopen" data-id="${w.id}"><h3>${esc(w.name.toUpperCase())}</h3><p>${esc(w.blurb)}</p><span class="chip">${meta}</span>${fig(COVER[w.id] || 'lib-' + w.id, 180, w.pose)}</button>`;
   }).join('')}`).join('')}<p style="color:var(--s2);font-size:14px;margin-top:6px">More exercises are on the way!</p></div>${tabBar('library')}</div>`;
 }
 acts.libopen = el => { const w = LIBRARY.find(x => x.id === el.dataset.id); go(w.levels ? 'hiitlevels' : 'libdetail', { id: w.id, lv: 0 }); };
@@ -87,7 +88,7 @@ views.libdetail = () => {
   const t = top(), w = LIBRARY.find(x => x.id === t.id), mv = libMoves(w, t.lv), secs = mv.reduce((a, m) => a + m[1], 0);
   const name = w.levels ? w.name + ' · ' + w.levels[t.lv].name : w.name;
   return `<div class="screen light"><div class="hero" style="background:${COLORS[w.id]}"><button class="icon-btn" data-act="back" aria-label="Back" style="margin-left:-10px">${I.back}</button>
-  <div class="figw" style="width:0;height:0"></div>${fig('lib-' + w.id, 260, w.pose)}<h2>${esc(name.toUpperCase())}</h2></div>
+  <div class="figw" style="width:0;height:0"></div>${fig(COVER[w.id] || 'lib-' + w.id, 260, w.pose)}<h2>${esc(name.toUpperCase())}</h2></div>
   <div class="content"><div class="row" style="gap:8px;margin:14px 0"><span class="chip">${Math.round(secs / 60)} mins</span><span class="chip">${mv.length} workouts</span></div>
   <p style="color:#4A5272;line-height:1.45;margin-bottom:12px"><b style="color:var(--ink);font-size:17px;display:block;margin-bottom:4px">Introduction</b>${esc(w.blurb)} Follow the voice coach. Move slowly and breathe.</p>
   <b style="font-size:17px">Exercise List</b>${mv.map(([id, s], i) => `<button class="exrow" data-act="mvsheet" data-id="${id}" data-s="${s}"><span class="thumb">${fig(id, 76)}</span><div><b>${esc(moveName(id))}</b><span>${mmss(s)}</span></div></button>`).join('')}</div>
